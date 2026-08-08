@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String   @id @default(uuid())
+  email              String   @unique
+  passwordHash       String
+  role               String   @default("USER") // USER | ADMIN | SUPPORT_AGENT
+  displayName        String
+  avatarUrl          String?
+  favoriteQuote      String?
+  tasteProfile       String   @default("{\"genres\":[],\"formats\":[]}")
+  childLockEnabled   Boolean  @default(false)
+  childLockPinHash   String?
+  maxMaturityRating  String   @default("ADULT_18") // G | PG13 | R | ADULT_18
+  onboardingComplete Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  interactions UserMediaInteraction[]
+  forumPosts   ForumPost[]
+  forumComments ForumComment[]
+  forumVotes   ForumVote[]
+  sentMessages ChatMessage[] @relation("SentMessages")
+  receivedMessages ChatMessage[] @relation("ReceivedMessages")
+  customLists  CustomList[]
+  notifications Notification[]
+}
+
+model MediaItem {
+  id              String   @id @default(uuid())
+  title           String
+  type            String // MOVIE | SERIES | GAME | BOOK | MANGA | MUSIC_ALBUM
+  genreTags       String   @default("[]")
+  summary         String
+  boxOfficeOrRank BigInt   @default(0)
+  coverImageUrl   String
+  bannerImageUrl  String
+  releaseYear     Int
+  language        String   @default("English")
+  maturityRating  String   @default("PG13")
+  metadata        String   @default("{}")
+  averageRating   Float    @default(0)
+  ratingCount     Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  interactions UserMediaInteraction[]
+  forumPosts   ForumPost[]
+  listItems    CustomListItem[]
+
+  @@index([title])
+  @@index([type])
+  @@index([averageRating])
+}
+
+model UserMediaInteraction {
+  id             String   @id @default(uuid())
+  userId         String
+  mediaId        String
+  isFavorite     Boolean  @default(false)
+  wishlistStatus String   @default("NONE") // PLAN_TO_WATCH | COMPLETED | DROPPED | ON_HOLD | NONE
+  userRating     Float?
+  reviewText     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media MediaItem @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, mediaId])
+  @@index([userId])
+  @@index([mediaId])
+}
+
+model ForumPost {
+  id            String   @id @default(uuid())
+  mediaId       String
+  authorId      String
+  title         String
+  body          String
+  upvotesCount   Int      @default(0)
+  downvotesCount Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  media    MediaItem      @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  author   User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments ForumComment[]
+  votes    ForumVote[]
+
+  @@index([mediaId])
+  @@index([createdAt])
+}
+
+model ForumComment {
+  id              String   @id @default(uuid())
+  postId          String
+  parentCommentId String?
+  authorId        String
+  content         String
+  upvotes          Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  post          ForumPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parentComment ForumComment? @relation("CommentThread", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies       ForumComment[] @relation("CommentThread")
+  author        User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  votes         ForumVote[]
+
+  @@index([postId])
+}
+
+model ForumVote {
+  id        String   @id @default(uuid())
+  userId    String
+  postId    String?
+  commentId String?
+  value     Int // 1 or -1
+  createdAt DateTime @default(now())
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post    ForumPost?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment ForumComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([postId])
+  @@index([commentId])
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String?
+  roomId     String   @default("support")
+  message    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  sender   User  @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User? @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: SetNull)
+
+  @@index([roomId])
+  @@index([senderId])
+  @@index([createdAt])
+}
+
+model CustomList {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  description String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CustomListItem[]
+
+  @@index([userId])
+}
+
+model CustomListItem {
+  id        String   @id @default(uuid())
+  listId    String
+  mediaId   String
+  createdAt DateTime @default(now())
+
+  list  CustomList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  media MediaItem  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, mediaId])
+  @@index([listId])
+  @@index([mediaId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // SUPPORT | FORUM | SYSTEM
+  title     String
+  body      String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}

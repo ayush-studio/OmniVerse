@@ -1,0 +1,134 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { authApi } from '@/services/api'
+import { useAuthStore } from '@/store'
+import { Button, Input, Label } from '@/components/ui'
+
+export default function LoginPage() {
+  const [mode, setMode] = useState('login')
+  const [form, setForm] = useState({ email: '', password: '', displayName: '' })
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const setAuth = useAuthStore((s) => s.setAuth)
+  const navigate = useNavigate()
+
+  async function submit(e) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      const { data } =
+        mode === 'login'
+          ? await authApi.login({ email: form.email, password: form.password })
+          : await authApi.register(form)
+      setAuth(data.token, data.user)
+      navigate(data.user.onboardingComplete ? '/' : '/onboarding')
+    } catch (err) {
+      setError(err.response?.data?.error || 'Something went wrong')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-svh grid lg:grid-cols-2">
+      <div
+        className="relative hidden lg:block bg-cover bg-center"
+        style={{
+          backgroundImage:
+            'url(https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80)',
+        }}
+      >
+        <div className="absolute inset-0" style={{ background: 'var(--hero-overlay)' }} />
+        <div className="relative z-10 h-full flex flex-col justify-end p-12">
+          <p className="font-display text-5xl font-extrabold tracking-tight">
+            <span className="text-teal-400">Omni</span>Verse
+          </p>
+          <p className="mt-3 text-lg text-[var(--text-muted)] max-w-md">
+            One universe for movies, games, manga, music, and the communities that obsess over them.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center p-6">
+        <motion.form
+          onSubmit={submit}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md glass rounded-3xl p-8 space-y-4"
+        >
+          <div>
+            <h1 className="font-display text-3xl font-bold">
+              {mode === 'login' ? 'Welcome back' : 'Join OmniVerse'}
+            </h1>
+            <p className="text-sm text-[var(--text-muted)] mt-1">
+              {mode === 'login' ? 'Sign in to sync your lists & forums' : 'Create your entertainment identity'}
+            </p>
+          </div>
+
+          {mode === 'register' && (
+            <div>
+              <Label>Display name</Label>
+              <Input
+                value={form.displayName}
+                onChange={(e) => setForm({ ...form, displayName: e.target.value })}
+                required
+              />
+            </div>
+          )}
+          <div>
+            <Label>Email</Label>
+            <Input
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              required
+            />
+          </div>
+          <div>
+            <Label>Password</Label>
+            <Input
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              required
+              minLength={6}
+            />
+          </div>
+
+          {error && <p className="text-sm text-rose-400">{error}</p>}
+
+          <Button className="w-full" disabled={loading}>
+            {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
+          </Button>
+
+          <p className="text-sm text-center text-[var(--text-muted)]">
+            {mode === 'login' ? (
+              <>
+                New here?{' '}
+                <button type="button" className="text-teal-400" onClick={() => setMode('register')}>
+                  Create an account
+                </button>
+              </>
+            ) : (
+              <>
+                Already have an account?{' '}
+                <button type="button" className="text-teal-400" onClick={() => setMode('login')}>
+                  Sign in
+                </button>
+              </>
+            )}
+          </p>
+
+          <p className="text-[11px] text-center text-[var(--text-muted)]">
+            Local seed accounts are documented in the project README (rotate before any public deploy).
+          </p>
+          <Link to="/" className="block text-center text-xs text-[var(--text-muted)] hover:text-teal-300">
+            Continue browsing without account
+          </Link>
+        </motion.form>
+      </div>
+    </div>
+  )
+}

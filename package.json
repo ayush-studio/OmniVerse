@@ -1,0 +1,13 @@
+{
+  "name": "omniverse",
+  "private": true,
+  "version": "1.0.0",
+  "description": "OmniVerse entertainment aggregator",
+  "scripts": {
+    "setup": "npm --prefix server run setup",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "start": "npm --prefix server start"
+  }
+}
