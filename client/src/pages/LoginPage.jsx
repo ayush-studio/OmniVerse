@@ -121,9 +121,45 @@ export default function LoginPage() {
             )}
           </p>
 
-          <p className="text-[11px] text-center text-[var(--text-muted)]">
-            Local seed accounts are documented in the project README (rotate before any public deploy).
-          </p>
+          <div className="pt-2 border-t border-[var(--border)] space-y-2">
+            <p className="text-[11px] font-bold text-center uppercase tracking-wider text-[var(--text-muted)]">
+              Quick Demo Accounts
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setForm({ email: 'chuckle@omniverse.app', password: 'chuckle123', displayName: 'Chuckle Chieftain' })
+                setMode('login')
+              }}
+              className="w-full py-2 px-3 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 border border-teal-500/30 text-teal-300 text-xs font-semibold flex items-center justify-between transition"
+            >
+              <span>👑 Chuckle Chieftain (Curated Library & Debates)</span>
+              <span className="text-[10px] bg-teal-400/20 px-1.5 py-0.5 rounded">Fill</span>
+            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setForm({ email: 'demo@omniverse.app', password: 'user123', displayName: 'Demo Explorer' })
+                  setMode('login')
+                }}
+                className="py-1.5 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-[var(--text-muted)] hover:text-[var(--text)] text-left transition"
+              >
+                👤 Demo User
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setForm({ email: 'admin@omniverse.app', password: 'admin123', displayName: 'Omni Admin' })
+                  setMode('login')
+                }}
+                className="py-1.5 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-[var(--text-muted)] hover:text-[var(--text)] text-left transition"
+              >
+                🛡️ Omni Admin
+              </button>
+            </div>
+          </div>
+
           <Link to="/" className="block text-center text-xs text-[var(--text-muted)] hover:text-teal-300">
             Continue browsing without account
           </Link>

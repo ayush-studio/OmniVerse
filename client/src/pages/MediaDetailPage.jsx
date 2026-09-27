@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Star, Heart, BookmarkPlus, ListPlus } from 'lucide-react'
+import { Star, Heart, BookmarkPlus, ListPlus, Play, Film, Sparkles } from 'lucide-react'
 import { mediaApi, forumApi, listApi } from '@/services/api'
 import { useAuthStore, useRecentStore } from '@/store'
+import { usePlayerStore } from '@/store/playerStore'
 import { Badge, Button, Textarea, Input, Skeleton, Select } from '@/components/ui'
 import { PostCard } from '@/components/forum/Forum'
+import TrailerModal from '@/components/media/TrailerModal'
+import StreamingProvidersCard from '@/components/media/StreamingProvidersCard'
+import AudioPreviewPlayer from '@/components/media/AudioPreviewPlayer'
+import AmbientBackdrop from '@/components/media/AmbientBackdrop'
 import { typeLabel, WISHLIST_OPTIONS, cn } from '@/utils/cn'
 
 export default function MediaDetailPage() {
@@ -21,6 +26,8 @@ export default function MediaDetailPage() {
   const [lists, setLists] = useState([])
   const [selectedList, setSelectedList] = useState('')
   const [listMsg, setListMsg] = useState('')
+  const [enrichment, setEnrichment] = useState(null)
+  const [trailerOpen, setTrailerOpen] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -32,6 +39,15 @@ export default function MediaDetailPage() {
         setItem(data.item)
         addRecent(data.item)
         if (data.item.interaction?.userRating) setRating(data.item.interaction.userRating)
+
+        // Fetch enrichment in background without blocking initial render
+        mediaApi.getEnrichment(id)
+          .then((res) => {
+            if (alive) setEnrichment(res.data.enrichment)
+          })
+          .catch(() => {
+            // graceful fallback
+          })
       } finally {
         if (alive) setLoading(false)
       }
@@ -86,25 +102,50 @@ export default function MediaDetailPage() {
   const interaction = item.interaction || {}
 
   return (
-    <div>
-      <section className="relative min-h-[42vh] flex items-end">
-          <img
-            src={item.bannerImageUrl}
-            alt=""
-            referrerPolicy="no-referrer"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/70 to-black/30" />
-        <div className="relative z-10 mx-auto max-w-7xl w-full px-4 pb-8 flex gap-6 items-end">
+    <div className="relative">
+      <section className="relative min-h-[46vh] flex items-end overflow-hidden">
+        <AmbientBackdrop imageUrl={item.coverImageUrl} />
+        <img
+          src={item.bannerImageUrl}
+          alt=""
+          referrerPolicy="no-referrer"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/75 to-black/40" />
+        <div className="relative z-10 mx-auto max-w-7xl w-full px-4 pb-8 flex flex-col sm:flex-row gap-6 sm:items-end">
           <img
             src={item.coverImageUrl}
             alt=""
             referrerPolicy="no-referrer"
-            className="w-36 sm:w-48 rounded-2xl shadow-2xl hidden sm:block border border-white/10"
+            className="w-36 sm:w-48 rounded-2xl shadow-2xl hidden sm:block border border-white/10 shrink-0"
           />
           <div className="flex-1 pb-1">
-            <Badge>{typeLabel(item.type)}</Badge>
-            <h1 className="font-display text-4xl sm:text-5xl font-extrabold mt-2">{item.title}</h1>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+              <Badge>{typeLabel(item.type)}</Badge>
+              {(item.type === 'MOVIE' || item.type === 'SERIES' || item.type === 'GAME') && (
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    if (enrichment?.trailer?.youtubeKey) {
+                      usePlayerStore.getState().playTrailer({
+                        title: item.title,
+                        youtubeKey: enrichment.trailer.youtubeKey,
+                        watchUrl: enrichment.trailer.watchUrl,
+                        mediaId: item.id,
+                        coverUrl: item.coverImageUrl,
+                      })
+                    } else {
+                      setTrailerOpen(true)
+                    }
+                  }}
+                  className="gap-2 shadow-lg bg-teal-400 hover:bg-teal-300 text-slate-950 font-bold border-0"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>{item.type === 'GAME' ? 'Gameplay Trailer' : 'Watch Trailer'}</span>
+                </Button>
+              )}
+            </div>
+            <h1 className="font-display text-3xl sm:text-5xl font-extrabold">{item.title}</h1>
             <p className="text-[var(--text-muted)] mt-2 flex flex-wrap gap-3 text-sm">
               <span>{item.releaseYear}</span>
               <span>{item.language}</span>
@@ -140,20 +181,37 @@ export default function MediaDetailPage() {
         </div>
 
         {tab === 'overview' && (
-          <div className="grid lg:grid-cols-[1fr_280px] gap-8">
-            <div>
-              <h2 className="font-display text-xl font-bold mb-2">Synopsis</h2>
-              <p className="text-[var(--text-muted)] leading-relaxed">{item.summary}</p>
-              {item.metadata && Object.keys(item.metadata).length > 0 && (
-                <div className="mt-6 grid sm:grid-cols-2 gap-3">
-                  {Object.entries(item.metadata).map(([k, v]) => (
-                    <div key={k} className="glass rounded-xl p-3">
-                      <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)]">{k}</p>
-                      <p className="text-sm mt-1">{Array.isArray(v) ? v.join(', ') : String(v)}</p>
-                    </div>
-                  ))}
-                </div>
+          <div className="grid lg:grid-cols-[1fr_300px] gap-8">
+            <div className="space-y-6">
+              <div className="glass rounded-3xl p-6 border border-white/10">
+                <h2 className="font-display text-xl font-bold mb-2">Synopsis</h2>
+                <p className="text-[var(--text-muted)] leading-relaxed">{item.summary}</p>
+                {item.metadata && Object.keys(item.metadata).length > 0 && (
+                  <div className="mt-6 grid sm:grid-cols-2 gap-3">
+                    {Object.entries(item.metadata).map(([k, v]) => (
+                      <div key={k} className="bg-slate-900/40 rounded-xl p-3 border border-white/5">
+                        <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)]">{k}</p>
+                        <p className="text-sm mt-1">{Array.isArray(v) ? v.join(', ') : String(v)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Interactive Audio Player for Music Albums */}
+              {enrichment?.audioPreview && (
+                <AudioPreviewPlayer
+                  audioData={enrichment.audioPreview}
+                  albumTitle={item.title}
+                />
               )}
+
+              {/* Streaming & Storefront Availability */}
+              <StreamingProvidersCard
+                providers={enrichment?.providers}
+                type={item.type}
+                title={item.title}
+              />
             </div>
 
             <aside className="glass rounded-2xl p-4 h-fit space-y-4">
@@ -302,6 +360,15 @@ export default function MediaDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Trailer & Video Preview Modal */}
+      <TrailerModal
+        isOpen={trailerOpen}
+        onClose={() => setTrailerOpen(false)}
+        trailer={enrichment?.trailer}
+        title={item.title}
+        type={item.type}
+      />
     </div>
   )
 }

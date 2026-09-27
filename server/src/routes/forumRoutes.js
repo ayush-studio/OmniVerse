@@ -4,6 +4,9 @@ import { authenticate, optionalAuth } from '../middleware/auth.js';
 
 const router = Router();
 
+router.get('/posts', optionalAuth, forum.listPosts);
+router.post('/posts', authenticate, forum.createPost);
+router.get('/trending', optionalAuth, forum.getTrendingDiscussions);
 router.get('/media/:mediaId/posts', optionalAuth, forum.listPosts);
 router.post('/media/:mediaId/posts', authenticate, forum.createPost);
 router.get('/posts/:postId', optionalAuth, forum.getPost);

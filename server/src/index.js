@@ -32,7 +32,7 @@ app.use(
 
 app.use(
   cors({
-    origin: env.clientUrl,
+    origin: env.isProd ? env.clientUrl : true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   })

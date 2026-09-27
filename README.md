@@ -46,11 +46,12 @@ npm run dev            # http://localhost:5173
 ```
 
 ### Demo accounts (seeded — change in production)
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | `admin@omniverse.app` | `admin123` |
-| Support | `support@omniverse.app` | `support123` |
-| User | `demo@omniverse.app` | `user123` |
+| Role | Name | Email | Password |
+|------|------|-------|----------|
+| **Curated Profile** | `Chuckle Chieftain` | `chuckle@omniverse.app` | `chuckle123` |
+| Admin | `Omni Admin` | `admin@omniverse.app` | `admin123` |
+| Support | `Support Agent` | `support@omniverse.app` | `support123` |
+| User | `Demo Explorer` | `demo@omniverse.app` | `user123` |
 
 > **Never** reuse these passwords or the sample `JWT_SECRET` in a real deployment.
 

@@ -810,13 +810,6 @@ const books = mapBooks();
 const manga = mapManga();
 const musicAlbums = mapAlbums();
 
-const out = `export const movies = ${JSON.stringify(movies, null, 2)};
-export const games = ${JSON.stringify(games, null, 2)};
-export const series = ${JSON.stringify(series, null, 2)};
-export const books = ${JSON.stringify(books, null, 2)};
-export const manga = ${JSON.stringify(manga, null, 2)};
-export const musicAlbums = ${JSON.stringify(musicAlbums, null, 2)};
-
 export const AVATAR_PRESETS = [
   'https://api.dicebear.com/7.x/avataaars/svg?seed=Aria',
   'https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus',
@@ -834,16 +827,32 @@ export const AVATAR_PRESETS = [
   'https://api.dicebear.com/7.x/avataaars/svg?seed=Diego',
 ];
 
+export { movies, games, series, books, manga, musicAlbums };
+
+export default { movies, games, series, books, manga, musicAlbums, AVATAR_PRESETS };
+
+// Write static seedData.js when executed directly
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+if (isMain) {
+  const out = `export const movies = ${JSON.stringify(movies, null, 2)};
+export const games = ${JSON.stringify(games, null, 2)};
+export const series = ${JSON.stringify(series, null, 2)};
+export const books = ${JSON.stringify(books, null, 2)};
+export const manga = ${JSON.stringify(manga, null, 2)};
+export const musicAlbums = ${JSON.stringify(musicAlbums, null, 2)};
+
+export const AVATAR_PRESETS = ${JSON.stringify(AVATAR_PRESETS, null, 2)};
+
 export default { movies, games, series, books, manga, musicAlbums, AVATAR_PRESETS };
 `;
-
-fs.writeFileSync(path.join(__dirname, 'seedData.js'), out);
-console.log({
-  movies: movies.length,
-  games: games.length,
-  series: series.length,
-  books: books.length,
-  manga: manga.length,
-  albums: musicAlbums.length,
-  total: movies.length + games.length + series.length + books.length + manga.length + musicAlbums.length,
-});
+  fs.writeFileSync(path.join(__dirname, 'seedData.js'), out);
+  console.log({
+    movies: movies.length,
+    games: games.length,
+    series: series.length,
+    books: books.length,
+    manga: manga.length,
+    albums: musicAlbums.length,
+    total: movies.length + games.length + series.length + books.length + manga.length + musicAlbums.length,
+  });
+}

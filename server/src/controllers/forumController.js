@@ -10,14 +10,36 @@ function scoreHot(post) {
 
 export async function listPosts(req, res, next) {
   try {
-    const { mediaId } = req.params;
-    const { sort = 'hot', page, limit } = req.query;
+    const mediaId = req.params.mediaId || req.query.mediaId;
+    const { sort = 'hot', page, limit, category, postType, search, tag } = req.query;
     const { skip, take, page: p, limit: l } = paginate({ page, limit: limit || 20 });
 
+    const where = {};
+    if (mediaId) {
+      where.mediaId = mediaId;
+    }
+    if (category && category !== 'ALL') {
+      where.category = category.toUpperCase();
+    }
+    if (postType && postType !== 'ALL') {
+      where.postType = postType.toUpperCase();
+    }
+    if (search && search.trim()) {
+      const q = search.trim();
+      where.OR = [
+        { title: { contains: q } },
+        { body: { contains: q } },
+      ];
+    }
+    if (tag && tag.trim()) {
+      where.tags = { contains: tag.trim() };
+    }
+
     let posts = await prisma.forumPost.findMany({
-      where: { mediaId },
+      where,
       include: {
         author: { select: { id: true, displayName: true, avatarUrl: true } },
+        media: { select: { id: true, title: true, type: true, coverImageUrl: true } },
         _count: { select: { comments: true } },
       },
     });
@@ -26,6 +48,11 @@ export async function listPosts(req, res, next) {
       posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } else if (sort === 'top') {
       posts.sort((a, b) => b.upvotesCount - b.downvotesCount - (a.upvotesCount - a.downvotesCount));
+    } else if (sort === 'comments') {
+      posts.sort((a, b) => (b._count?.comments || 0) - (a._count?.comments || 0));
+    } else if (sort === 'unanswered') {
+      posts = posts.filter(p => (p._count?.comments || 0) === 0);
+      posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } else if (sort === 'controversial') {
       posts.sort(
         (a, b) =>
@@ -39,7 +66,7 @@ export async function listPosts(req, res, next) {
     const sliced = posts.slice(skip, skip + take);
 
     let voteMap = {};
-    if (req.user) {
+    if (req.user && sliced.length > 0) {
       const votes = await prisma.forumVote.findMany({
         where: { userId: req.user.id, postId: { in: sliced.map((p) => p.id) } },
       });
@@ -49,6 +76,13 @@ export async function listPosts(req, res, next) {
     res.json({
       posts: sliced.map((post) => ({
         ...post,
+        tags: (() => {
+          try {
+            return JSON.parse(post.tags || '[]');
+          } catch {
+            return [];
+          }
+        })(),
         userVote: voteMap[post.id] || 0,
         commentCount: post._count.comments,
       })),
@@ -61,28 +95,89 @@ export async function listPosts(req, res, next) {
 
 export async function createPost(req, res, next) {
   try {
-    const { mediaId } = req.params;
-    const { title, body } = req.body;
+    const mediaId = req.params.mediaId || req.body.mediaId || null;
+    const { title, body, category = 'GENERAL', postType = 'DISCUSSION', tags = [] } = req.body;
     if (!title?.trim() || !body?.trim()) {
       return res.status(400).json({ error: 'Title and body are required' });
     }
 
-    const media = await prisma.mediaItem.findUnique({ where: { id: mediaId } });
-    if (!media) return res.status(404).json({ error: 'Media not found' });
+    if (mediaId) {
+      const media = await prisma.mediaItem.findUnique({ where: { id: mediaId } });
+      if (!media) return res.status(404).json({ error: 'Media not found' });
+    }
+
+    const parsedTags = Array.isArray(tags) ? JSON.stringify(tags) : typeof tags === 'string' ? tags : '[]';
 
     const post = await prisma.forumPost.create({
       data: {
-        mediaId,
+        mediaId: mediaId || null,
         authorId: req.user.id,
         title: title.trim(),
         body: body.trim(),
+        category: category.toUpperCase(),
+        postType: postType.toUpperCase(),
+        tags: parsedTags,
       },
       include: {
         author: { select: { id: true, displayName: true, avatarUrl: true } },
+        media: { select: { id: true, title: true, type: true, coverImageUrl: true } },
       },
     });
 
-    res.status(201).json({ post: { ...post, userVote: 0, commentCount: 0 } });
+    res.status(201).json({
+      post: {
+        ...post,
+        tags: (() => {
+          try {
+            return JSON.parse(post.tags || '[]');
+          } catch {
+            return [];
+          }
+        })(),
+        userVote: 0,
+        commentCount: 0,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getTrendingDiscussions(req, res, next) {
+  try {
+    const posts = await prisma.forumPost.findMany({
+      take: 6,
+      orderBy: { upvotesCount: 'desc' },
+      include: {
+        author: { select: { id: true, displayName: true, avatarUrl: true } },
+        media: { select: { id: true, title: true, type: true, coverImageUrl: true } },
+        _count: { select: { comments: true } },
+      },
+    });
+
+    const categoryCounts = await prisma.forumPost.groupBy({
+      by: ['category'],
+      _count: { id: true },
+    });
+
+    res.json({
+      trending: posts.map((p) => ({
+        ...p,
+        tags: (() => {
+          try {
+            return JSON.parse(p.tags || '[]');
+          } catch {
+            return [];
+          }
+        })(),
+        commentCount: p._count.comments,
+      })),
+      stats: {
+        totalDiscussions: await prisma.forumPost.count(),
+        totalComments: await prisma.forumComment.count(),
+        categories: categoryCounts,
+      },
+    });
   } catch (err) {
     next(err);
   }

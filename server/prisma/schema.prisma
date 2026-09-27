@@ -80,22 +80,26 @@ model UserMediaInteraction {
 }
 
 model ForumPost {
-  id            String   @id @default(uuid())
-  mediaId       String
-  authorId      String
-  title         String
-  body          String
-  upvotesCount   Int      @default(0)
-  downvotesCount Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String         @id @default(uuid())
+  mediaId        String?
+  category       String         @default("GENERAL") // MOVIES | SERIES | GAMES | MUSIC | SPORTS | BOOKS | MANGA | GENERAL | QA
+  postType       String         @default("DISCUSSION") // DISCUSSION | QUESTION | REVIEW | THEORY | RECOMMENDATION | HOT_TAKE
+  tags           String         @default("[]")
+  authorId       String
+  title          String
+  body           String
+  upvotesCount   Int            @default(0)
+  downvotesCount Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
-  media    MediaItem      @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  media    MediaItem?     @relation(fields: [mediaId], references: [id], onDelete: SetNull)
   author   User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
   comments ForumComment[]
   votes    ForumVote[]
 
   @@index([mediaId])
+  @@index([category])
   @@index([createdAt])
 }
 

@@ -1,7 +1,11 @@
 import axios from 'axios'
 
+const baseURL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/api`
+  : '/api'
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -39,6 +43,7 @@ export const mediaApi = {
   genres: (type) => api.get('/media/genres', { params: type ? { type } : {} }),
   byIds: (ids) => api.get('/media/by-ids', { params: { ids: ids.join(',') } }),
   get: (id) => api.get(`/media/${id}`),
+  getEnrichment: (id) => api.get(`/media/${id}/enrichment`),
   recommendations: () => api.get('/media/recommendations'),
   library: (filter) => api.get('/media/library', { params: { filter } }),
   interact: (mediaId, data) => api.put(`/media/${mediaId}/interaction`, data),
@@ -59,6 +64,9 @@ export const notificationApi = {
 }
 
 export const forumApi = {
+  listAllPosts: (params) => api.get('/forum/posts', { params }),
+  createGeneralPost: (data) => api.post('/forum/posts', data),
+  getTrending: () => api.get('/forum/trending'),
   listPosts: (mediaId, params) => api.get(`/forum/media/${mediaId}/posts`, { params }),
   createPost: (mediaId, data) => api.post(`/forum/media/${mediaId}/posts`, data),
   getPost: (postId) => api.get(`/forum/posts/${postId}`),

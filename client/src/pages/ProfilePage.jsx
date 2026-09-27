@@ -4,6 +4,8 @@ import { useAuthStore } from '@/store'
 import { MediaGrid } from '@/components/media/MediaCard'
 import { Button, Input, Label, Textarea } from '@/components/ui'
 import EmptyState from '@/components/ui/EmptyState'
+import TasteCapsuleModal from '@/components/taste/TasteCapsuleModal'
+import { Sparkles } from 'lucide-react'
 
 const FILTERS = [
   { key: 'all', label: 'All' },
@@ -24,6 +26,7 @@ export default function ProfilePage() {
   const [newListName, setNewListName] = useState('')
   const [filter, setFilter] = useState('all')
   const [loading, setLoading] = useState(false)
+  const [tasteModalOpen, setTasteModalOpen] = useState(false)
   const [form, setForm] = useState({
     displayName: user?.displayName || '',
     favoriteQuote: user?.favoriteQuote || '',
@@ -106,6 +109,15 @@ export default function ProfilePage() {
               </span>
             ))}
           </div>
+
+          <Button
+            size="sm"
+            onClick={() => setTasteModalOpen(true)}
+            className="mt-4 gap-2 bg-gradient-to-r from-amber-400 via-teal-400 to-cyan-400 text-slate-950 font-bold border-0 shadow-lg shadow-teal-500/20 hover:scale-105 transition"
+          >
+            <Sparkles className="w-4 h-4 fill-current" />
+            <span>Generate Taste Capsule (Export Story)</span>
+          </Button>
         </div>
       </div>
 
@@ -240,6 +252,11 @@ export default function ProfilePage() {
           <Button type="submit">Save profile</Button>
         </form>
       )}
+
+      <TasteCapsuleModal
+        isOpen={tasteModalOpen}
+        onClose={() => setTasteModalOpen(false)}
+      />
     </div>
   )
 }

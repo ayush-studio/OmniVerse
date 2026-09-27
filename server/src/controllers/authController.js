@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../config/db.js';
 import { env } from '../config/env.js';
+import { seedUserStarterData } from '../services/starterDataService.js';
 
 function parseJson(value, fallback = {}) {
   try {
@@ -59,8 +60,16 @@ export async function register(req, res, next) {
         email: email.toLowerCase(),
         passwordHash,
         displayName: String(displayName).trim().slice(0, 60),
+        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(displayName)}`,
+        tasteProfile: JSON.stringify({
+          formats: ['Games', 'Movies', 'Series', 'Music', 'Sports', 'Anime'],
+          genres: ['AAA Story Games', 'Action Movies', 'Sci-Fi', 'Anime', 'Thriller Series'],
+        }),
       },
     });
+
+    // Automatically seed games, movies, songs, sports, and custom lists for new users
+    await seedUserStarterData(user.id);
 
     const token = signToken(user);
     res.status(201).json({ token, user: serializeUser(user) });

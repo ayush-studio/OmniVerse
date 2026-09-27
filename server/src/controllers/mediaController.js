@@ -1,5 +1,6 @@
 import { prisma } from '../config/db.js';
 import { parseJson, serializeMedia, canViewMaturity, paginate } from '../utils/helpers.js';
+import { getMediaEnrichmentData } from '../services/mediaEnrichmentService.js';
 
 export async function listMedia(req, res, next) {
   try {
@@ -291,6 +292,25 @@ export async function getByIds(req, res, next) {
     const map = Object.fromEntries(items.map((i) => [i.id, i]));
     const ordered = ids.map((id) => map[id]).filter(Boolean);
     res.json({ items: ordered.map((i) => serializeMedia(i)) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getMediaEnrichment(req, res, next) {
+  try {
+    const item = await prisma.mediaItem.findUnique({ where: { id: req.params.id } });
+    if (!item) return res.status(404).json({ error: 'Media not found' });
+
+    if (
+      req.user?.childLockEnabled &&
+      !canViewMaturity(req.user.maxMaturityRating, item.maturityRating)
+    ) {
+      return res.status(403).json({ error: 'Content blocked by child lock' });
+    }
+
+    const enrichment = await getMediaEnrichmentData(item);
+    res.json({ enrichment });
   } catch (err) {
     next(err);
   }

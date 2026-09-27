@@ -19,7 +19,8 @@ export function SocketProvider({ children }) {
       return
     }
 
-    const s = io('/', {
+    const serverUrl = import.meta.env.VITE_API_URL || '/'
+    const s = io(serverUrl, {
       auth: { token },
       transports: ['websocket', 'polling'],
     })

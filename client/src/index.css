@@ -84,22 +84,82 @@ h3,
   -webkit-backdrop-filter: blur(16px);
 }
 
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(20, 184, 166, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -10px var(--glow);
+}
+
 .glow-border:hover {
   box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.35), 0 12px 40px var(--glow);
 }
 
+.interactive-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.interactive-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.4), 0 0 20px -4px var(--glow);
+}
+
+.vote-btn {
+  transition: transform 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+.vote-btn:active {
+  transform: scale(1.2);
+}
+
 .scrollbar-thin::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
+  height: 6px;
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(139, 155, 180, 0.35);
+  background: rgba(139, 155, 180, 0.3);
   border-radius: 999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(20, 184, 166, 0.5);
 }
 
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+@keyframes holographicShine {
+  0% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(60deg); }
+  100% { filter: hue-rotate(0deg); }
+}
+
+.masterpiece-card {
+  box-shadow: 0 8px 32px -4px rgba(245, 158, 11, 0.25);
+}
+
+.masterpiece-card:hover {
+  box-shadow: 0 16px 40px -4px rgba(245, 158, 11, 0.45), 0 0 25px rgba(20, 184, 166, 0.35);
+  animation: holographicShine 6s infinite linear;
+}
+
+@keyframes pulseChroma {
+  0%, 100% { transform: scale(1.35) translateY(0); opacity: 0.35; }
+  50% { transform: scale(1.45) translateY(-12px); opacity: 0.55; }
+}
+
+.animate-pulse-chroma {
+  animation: pulseChroma 8s ease-in-out infinite alternate;
 }
 
 .skeleton {
@@ -108,3 +168,59 @@ h3,
   animation: shimmer 1.4s infinite;
   background-color: rgba(139, 155, 180, 0.12);
 }
+
+/* ==========================================================================
+   Responsive Media Queries & Production Layout Enhancements
+   ========================================================================== */
+
+/* Mobile Phones (up to 640px) */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+  .hide-on-mobile {
+    display: none !important;
+  }
+  .mobile-p-3 {
+    padding: 0.75rem !important;
+  }
+  .mobile-col {
+    flex-direction: column !important;
+  }
+  .mobile-safe-bottom {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 1rem)) !important;
+  }
+  .font-display-hero {
+    font-size: 2.25rem !important;
+    line-height: 2.5rem !important;
+  }
+}
+
+/* Tablets (641px to 1024px) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .tablet-stack {
+    flex-direction: column !important;
+  }
+}
+
+/* Desktop and Large Screens (1025px+) */
+@media (min-width: 1025px) {
+  .desktop-sticky-sidebar {
+    position: sticky;
+    top: 5.5rem;
+    height: fit-content;
+  }
+}
+
+/* Ultra-Wide Monitors (1536px+) */
+@media (min-width: 1536px) {
+  .ultra-wide-container {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+

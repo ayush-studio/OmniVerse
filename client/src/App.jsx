@@ -5,6 +5,8 @@ import HomePage from '@/pages/HomePage'
 import BrowsePage from '@/pages/BrowsePage'
 import MediaDetailPage from '@/pages/MediaDetailPage'
 import ForumPostPage from '@/pages/ForumPostPage'
+import CommunityPage from '@/pages/CommunityPage'
+import DiscoverPage from '@/pages/DiscoverPage'
 import LoginPage from '@/pages/LoginPage'
 import OnboardingPage from '@/pages/OnboardingPage'
 import ProfilePage from '@/pages/ProfilePage'
@@ -35,6 +37,9 @@ export default function App() {
           />
           <Route element={<AppLayout />}>
             <Route path="/" element={<HomePage />} />
+            <Route path="/discover" element={<DiscoverPage />} />
+            <Route path="/community" element={<CommunityPage />} />
+            <Route path="/discussions" element={<Navigate to="/community" replace />} />
             <Route path="/browse/:type" element={<BrowsePage />} />
             <Route path="/media/:id" element={<MediaDetailPage />} />
             <Route path="/forum/:postId" element={<ForumPostPage />} />

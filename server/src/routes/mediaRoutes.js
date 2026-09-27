@@ -11,6 +11,7 @@ router.get('/by-ids', optionalAuth, media.getByIds);
 router.get('/recommendations', authenticate, media.getRecommendations);
 router.get('/library', authenticate, media.getUserLibrary);
 router.get('/:id', optionalAuth, media.getMedia);
+router.get('/:id/enrichment', optionalAuth, media.getMediaEnrichment);
 router.put('/:mediaId/interaction', authenticate, media.upsertInteraction);
 
 export default router;
