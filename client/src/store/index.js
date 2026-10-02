@@ -30,6 +30,8 @@ export const useUiStore = create(
       theme: 'dark',
       chatOpen: false,
       searchOpen: false,
+      enableAntiGravity: true,
+      reducedMotion: false,
       setTheme: (theme) => {
         document.documentElement.classList.toggle('dark', theme === 'dark')
         set({ theme })
@@ -44,10 +46,16 @@ export const useUiStore = create(
       toggleChat: () => set((s) => ({ chatOpen: !s.chatOpen })),
       setSearchOpen: (searchOpen) => set({ searchOpen }),
       toggleSearch: () => set((s) => ({ searchOpen: !s.searchOpen })),
+      toggleAntiGravity: () => set((s) => ({ enableAntiGravity: !s.enableAntiGravity })),
+      setReducedMotion: (reducedMotion) => set({ reducedMotion }),
     }),
-    { name: 'omniverse-ui', partialize: (s) => ({ theme: s.theme }) }
+    {
+      name: 'omniverse-ui',
+      partialize: (s) => ({ theme: s.theme, enableAntiGravity: s.enableAntiGravity }),
+    }
   )
 )
+
 
 export const useRecentStore = create(
   persist(

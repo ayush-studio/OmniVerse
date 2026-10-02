@@ -145,3 +145,7 @@ export function Select({ className, value, onChange, options = [], placeholder =
     </div>
   )
 }
+
+export { ZeroGCard } from './ZeroGCard'
+export { FloatingWidget } from './FloatingWidget'
+

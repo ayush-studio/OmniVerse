@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Moon,
   Sun,
-  MessageCircle,
   LogOut,
   Shield,
   User,
@@ -19,22 +18,52 @@ import {
   Volume2,
   VolumeX,
   Zap,
+  ChevronDown,
+  Film,
+  Tv,
+  Gamepad2,
+  BookOpen,
+  BookMarked,
+  Music,
+  Sliders,
+  Check,
 } from 'lucide-react'
 import { useAuthStore, useUiStore } from '@/store'
 import { authApi } from '@/services/api'
 import { Button } from '@/components/ui'
-import { MEDIA_TYPES, COMMUNITY_CHANNELS } from '@/utils/cn'
+import { MEDIA_TYPES } from '@/utils/cn'
 import { haptics } from '@/utils/audioHaptics'
 import ChatWidget from '@/components/chat/ChatWidget'
 import GlobalSearch from '@/components/layout/GlobalSearch'
 import NotificationBell from '@/components/layout/NotificationBell'
 import PersistentPlayerDock from '@/components/media/PersistentPlayerDock'
 
+const CATEGORY_ICONS = {
+  MOVIE: Film,
+  SERIES: Tv,
+  GAME: Gamepad2,
+  BOOK: BookOpen,
+  MANGA: BookMarked,
+  MUSIC_ALBUM: Music,
+}
+
 export default function AppLayout() {
   const { user, token, setUser, logout } = useAuthStore()
-  const { theme, toggleTheme, toggleChat, setSearchOpen } = useUiStore()
+  const {
+    theme,
+    toggleTheme,
+    setSearchOpen,
+    enableAntiGravity,
+    toggleAntiGravity,
+  } = useUiStore()
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [browseDropdownOpen, setBrowseDropdownOpen] = useState(false)
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
   const [soundEnabled, setSoundEnabled] = useState(haptics.enabled)
+
+  const browseRef = useRef(null)
+  const profileRef = useRef(null)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -42,10 +71,26 @@ export default function AppLayout() {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
 
+  // Close menus on route change
   useEffect(() => {
-    // Close mobile menu on route change
     setMobileMenuOpen(false)
+    setBrowseDropdownOpen(false)
+    setProfileDropdownOpen(false)
   }, [location.pathname])
+
+  // Close dropdowns on click outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (browseRef.current && !browseRef.current.contains(e.target)) {
+        setBrowseDropdownOpen(false)
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   useEffect(() => {
     if (!token) return
@@ -61,153 +106,301 @@ export default function AppLayout() {
   const tasteTabs =
     user?.tasteProfile?.formats?.length > 0
       ? user.tasteProfile.formats
-      : MEDIA_TYPES.map((t) => t.label)
+      : ['Movies', 'Games', 'Anime', 'Series', 'Music']
 
   return (
     <div className="min-h-svh flex flex-col bg-[var(--bg)] text-[var(--text)] transition-colors duration-200">
-      {/* Top Header Navbar */}
-      <header className="sticky top-0 z-40 glass border-b border-[var(--border)]">
-        <div className="mx-auto max-w-7xl px-3 sm:px-4 h-16 flex items-center justify-between gap-3">
-          {/* Logo & Brand */}
+      {/* Top Header Navbar - Redesigned, Decluttered & Modern */}
+      <header className="sticky top-0 z-40 zerog-glass border-b border-[var(--border)] shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+        <div className="mx-auto max-w-7xl px-3 sm:px-6 h-16 flex items-center justify-between gap-4">
+          
+          {/* Left: Brand Logo & Primary Navigation Links */}
           <div className="flex items-center gap-6">
-            <Link to="/" className="font-display text-xl sm:text-2xl font-extrabold tracking-tight shrink-0 flex items-center gap-1.5">
-              <span className="w-7 h-7 rounded-lg bg-gradient-to-tr from-teal-400 to-cyan-400 text-slate-950 flex items-center justify-center font-bold text-sm shadow-md shadow-teal-500/20">
+            <Link
+              to="/"
+              className="group flex items-center gap-2.5 font-display text-xl sm:text-2xl font-black tracking-tight shrink-0"
+            >
+              <span className="w-8 h-8 rounded-xl bg-gradient-to-tr from-teal-400 via-cyan-400 to-indigo-500 text-slate-950 flex items-center justify-center font-black text-sm shadow-[0_0_20px_rgba(20,184,166,0.5)] group-hover:scale-105 transition-transform duration-300">
                 Ω
               </span>
-              <span><span className="text-teal-400">Omni</span>Verse</span>
+              <span className="tracking-tight">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-300">Omni</span>
+                <span className="text-[var(--text)]">Verse</span>
+              </span>
             </Link>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1">
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-1.5">
+              {/* Sleek Browse Categories Dropdown */}
+              <div className="relative" ref={browseRef}>
+                <button
+                  type="button"
+                  onClick={() => setBrowseDropdownOpen(!browseDropdownOpen)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
+                    browseDropdownOpen || location.pathname.startsWith('/browse')
+                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-sm'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5 border border-transparent'
+                  }`}
+                  aria-expanded={browseDropdownOpen}
+                >
+                  <Compass className="w-3.5 h-3.5 text-teal-400" />
+                  <span>Browse</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${browseDropdownOpen ? 'rotate-180 text-teal-300' : 'opacity-60'}`} />
+                </button>
+
+                <AnimatePresence>
+                  {browseDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute left-0 mt-2 w-64 p-2 rounded-2xl zerog-glass border border-[var(--border)] shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 backdrop-blur-2xl"
+                    >
+                      <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                        Explore Catalog
+                      </div>
+                      <div className="grid grid-cols-1 gap-1">
+                        {MEDIA_TYPES.map((t) => {
+                          const Icon = CATEGORY_ICONS[t.key] || Compass
+                          const active = location.pathname === t.path
+                          return (
+                            <Link
+                              key={t.key}
+                              to={t.path}
+                              onClick={() => setBrowseDropdownOpen(false)}
+                              className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                                active
+                                  ? 'bg-teal-500/20 text-teal-300 font-semibold'
+                                  : 'text-[var(--text)] hover:bg-white/5 hover:text-teal-300'
+                              }`}
+                            >
+                              <div className={`p-1.5 rounded-lg ${active ? 'bg-teal-400/20 text-teal-300' : 'bg-white/5 text-[var(--text-muted)]'}`}>
+                                <Icon className="w-3.5 h-3.5" />
+                              </div>
+                              <div className="flex-1">
+                                <div>{t.label}</div>
+                              </div>
+                              {active && <Check className="w-3.5 h-3.5 text-teal-400" />}
+                            </Link>
+                          )
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Community Tab */}
               <NavLink
                 to="/community"
                 className={({ isActive }) =>
-                  `px-3 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 ${
+                  `px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                     isActive
-                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5'
+                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5 border border-transparent'
                   }`
                 }
               >
-                <Flame className="w-4 h-4 text-rose-400 animate-pulse" />
+                <Flame className="w-3.5 h-3.5 text-rose-400" />
                 <span>Community</span>
-                <span className="px-1.5 py-0.2 text-[10px] rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
-                  Reddit Hub
-                </span>
               </NavLink>
 
+              {/* OmniSwipe Discover Tab */}
               <NavLink
                 to="/discover"
                 className={({ isActive }) =>
-                  `px-3 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 ${
+                  `px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                     isActive
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5 border border-transparent'
                   }`
                 }
               >
-                <Zap className="w-4 h-4 text-amber-400" />
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
                 <span>OmniSwipe</span>
-                <span className="px-1.5 py-0.2 text-[10px] rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
-                  New
-                </span>
               </NavLink>
-
-              <div className="h-4 w-px bg-[var(--border)] mx-1" />
-
-              {MEDIA_TYPES.map((t) => (
-                <NavLink
-                  key={t.key}
-                  to={t.path}
-                  className={({ isActive }) =>
-                    `px-3 py-1.5 rounded-lg text-sm transition ${
-                      isActive
-                        ? 'bg-teal-500/15 text-teal-300 font-medium'
-                        : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5'
-                    }`
-                  }
-                >
-                  {t.label}
-                </NavLink>
-              ))}
             </nav>
           </div>
 
-          {/* Desktop & Mobile Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Center: Search Trigger (Responsive & Clean) */}
+          <div className="flex-1 max-w-md mx-2 hidden sm:block">
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="w-full h-9 px-3.5 rounded-full bg-black/10 dark:bg-white/5 hover:bg-black/15 dark:hover:bg-white/10 border border-[var(--border)] hover:border-teal-500/40 text-[var(--text-muted)] hover:text-[var(--text)] text-xs flex items-center justify-between transition-all group"
+            >
+              <span className="flex items-center gap-2">
+                <Search className="w-3.5 h-3.5 text-teal-400 group-hover:scale-110 transition-transform" />
+                <span className="truncate">Search 500+ titles, genres, forums…</span>
+              </span>
+              <kbd className="hidden lg:inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-black/20 dark:bg-white/10 text-[10px] font-mono text-[var(--text-muted)]">
+                Ctrl K
+              </kbd>
+            </button>
+          </div>
+
+          {/* Right: Actions, Notifications & Unified Profile Menu */}
+          <div className="flex items-center gap-2">
+            {/* Mobile search icon */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSearchOpen(true)}
               aria-label="Search"
-              className="gap-1.5 px-2.5 sm:px-3"
+              className="sm:hidden p-2 rounded-full"
             >
               <Search className="w-4 h-4 text-teal-400" />
-              <span className="hidden md:inline text-[var(--text-muted)] text-xs">Ctrl K</span>
             </Button>
 
-            <Button variant="ghost" size="sm" onClick={toggleTheme} aria-label="Toggle theme" className="p-2">
-              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-teal-400" />}
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                const next = haptics.toggleSound()
-                setSoundEnabled(next)
-              }}
-              aria-label="Toggle UI Sound FX"
-              title={soundEnabled ? 'UI Sound FX On (click to mute)' : 'UI Sound FX Off (click to enable)'}
-              className="p-2"
-            >
-              {soundEnabled ? (
-                <Volume2 className="w-4 h-4 text-teal-400" />
-              ) : (
-                <VolumeX className="w-4 h-4 text-[var(--text-muted)]" />
-              )}
-            </Button>
-
+            {/* Notifications */}
             {user && <NotificationBell />}
 
-            {user && (
-              <Button variant="ghost" size="sm" onClick={toggleChat} aria-label="Support chat" className="p-2 hidden sm:inline-flex">
-                <MessageCircle className="w-4 h-4" />
-              </Button>
-            )}
-
+            {/* Admin Shield (if admin) */}
             {user?.role === 'ADMIN' && (
-              <Button variant="ghost" size="sm" onClick={() => navigate('/admin')} title="Admin Portal" className="p-2">
-                <Shield className="w-4 h-4 text-teal-400" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/admin')}
+                title="Admin Control Center"
+                className="p-2 rounded-full text-teal-400 hover:bg-teal-500/10"
+              >
+                <Shield className="w-4 h-4" />
               </Button>
             )}
 
+            {/* Unified User Profile & Quick Settings Menu */}
             {user ? (
-              <div className="hidden sm:flex items-center gap-1.5">
-                <Button variant="ghost" size="sm" onClick={() => navigate('/profile')} className="gap-2">
-                  <img
-                    src={user.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest'}
-                    alt=""
-                    className="w-6 h-6 rounded-full border border-[var(--border)]"
-                  />
-                  <span className="hidden md:inline font-medium text-xs">{user.displayName}</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  title="Sign out"
-                  onClick={() => {
-                    logout()
-                    navigate('/login')
-                  }}
-                  className="p-2 text-[var(--text-muted)] hover:text-rose-400"
+              <div className="relative" ref={profileRef}>
+                <button
+                  type="button"
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-[var(--border)] hover:border-teal-500/30 transition-all duration-200"
+                  aria-label="User Profile and Settings"
                 >
-                  <LogOut className="w-4 h-4" />
-                </Button>
+                  <img
+                    src={user.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=ChuckleChief'}
+                    alt=""
+                    className="w-7 h-7 rounded-full border border-teal-400/40 object-cover shadow-sm"
+                  />
+                  <span className="hidden md:inline font-semibold text-xs text-[var(--text)] max-w-[100px] truncate">
+                    {user.displayName}
+                  </span>
+                  <ChevronDown className={`w-3 h-3 text-[var(--text-muted)] transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180 text-teal-400' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {profileDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-72 p-2 rounded-2xl zerog-glass border border-[var(--border)] shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-50 backdrop-blur-2xl"
+                    >
+                      {/* User Info Header */}
+                      <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex items-center gap-3 mb-2">
+                        <img
+                          src={user.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=ChuckleChief'}
+                          alt=""
+                          className="w-10 h-10 rounded-full border border-teal-400/50"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-xs truncate text-white">{user.displayName}</p>
+                          <p className="text-[10px] text-[var(--text-muted)] truncate">{user.email}</p>
+                          <span className="inline-block mt-1 text-[9px] px-1.5 py-0.2 rounded bg-teal-500/20 text-teal-300 font-bold border border-teal-500/30">
+                            {user.role}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Navigation Link */}
+                      <Link
+                        to="/profile"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[var(--text)] hover:bg-white/5 hover:text-teal-300 transition"
+                      >
+                        <User className="w-4 h-4 text-teal-400" />
+                        <span>My Library & Custom Lists</span>
+                      </Link>
+
+                      <div className="my-1.5 h-px bg-[var(--border)]" />
+
+                      {/* Quick Preference Toggles */}
+                      <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                        Experience Settings
+                      </div>
+
+                      {/* Anti-Gravity Tilt Toggle */}
+                      <button
+                        type="button"
+                        onClick={toggleAntiGravity}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-[var(--text)] hover:bg-white/5 transition"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Sliders className="w-3.5 h-3.5 text-teal-400" />
+                          <span>Zero-G 3D Tilt</span>
+                        </span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${enableAntiGravity ? 'bg-teal-500/20 text-teal-300' : 'bg-white/5 text-[var(--text-muted)]'}`}>
+                          {enableAntiGravity ? 'ON' : 'OFF'}
+                        </span>
+                      </button>
+
+                      {/* Audio Haptics Toggle */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = haptics.toggleSound()
+                          setSoundEnabled(next)
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-[var(--text)] hover:bg-white/5 transition"
+                      >
+                        <span className="flex items-center gap-2">
+                          {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-teal-400" /> : <VolumeX className="w-3.5 h-3.5 text-[var(--text-muted)]" />}
+                          <span>Audio Haptics</span>
+                        </span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${soundEnabled ? 'bg-teal-500/20 text-teal-300' : 'bg-white/5 text-[var(--text-muted)]'}`}>
+                          {soundEnabled ? 'ON' : 'OFF'}
+                        </span>
+                      </button>
+
+                      {/* Theme Toggle */}
+                      <button
+                        type="button"
+                        onClick={toggleTheme}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-[var(--text)] hover:bg-white/5 transition"
+                      >
+                        <span className="flex items-center gap-2">
+                          {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-indigo-400" />}
+                          <span>Theme</span>
+                        </span>
+                        <span className="text-[10px] font-bold capitalize text-[var(--text-muted)]">
+                          {theme}
+                        </span>
+                      </button>
+
+                      <div className="my-1.5 h-px bg-[var(--border)]" />
+
+                      {/* Sign Out */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          logout()
+                          navigate('/login')
+                          setProfileDropdownOpen(false)
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span>Sign Out</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
-              <Button size="sm" onClick={() => navigate('/login')} className="gap-1.5 hidden sm:inline-flex">
-                <User className="w-4 h-4" /> Sign in
+              <Button size="sm" onClick={() => navigate('/login')} className="gap-1.5 text-xs rounded-full px-4">
+                <User className="w-3.5 h-3.5" /> Sign in
               </Button>
             )}
 
@@ -215,39 +408,41 @@ export default function AppLayout() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl glass border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition"
+              className="md:hidden p-2 rounded-full glass border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition"
               aria-label="Open mobile menu"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5 text-teal-400" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-4 h-4 text-teal-400" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
         </div>
 
-        {/* Personalized Taste bar */}
+        {/* Refined Taste Capsule Bar */}
         {user && (
-          <div className="border-t border-[var(--border)] overflow-x-auto scrollbar-thin">
-            <div className="mx-auto max-w-7xl px-3 sm:px-4 h-9 flex items-center gap-2 text-xs">
-              <span className="text-[var(--text-muted)] shrink-0 flex items-center gap-1 font-medium">
-                <Sparkles className="w-3 h-3 text-teal-400" /> For you:
+          <div className="border-t border-[var(--border)]/60 bg-black/10 dark:bg-black/20 overflow-x-auto scrollbar-thin">
+            <div className="mx-auto max-w-7xl px-3 sm:px-6 h-8 flex items-center gap-2 text-xs">
+              <span className="text-[var(--text-muted)] shrink-0 flex items-center gap-1 font-semibold text-[11px]">
+                <Sparkles className="w-3 h-3 text-teal-400" /> Curated for you:
               </span>
-              {tasteTabs.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    const match = MEDIA_TYPES.find(
-                      (t) =>
-                        t.label.toLowerCase().includes(String(tab).toLowerCase()) ||
-                        String(tab)
-                          .toLowerCase()
-                          .includes(t.key.toLowerCase().split('_')[0].toLowerCase())
-                    )
-                    navigate(match?.path || '/browse/MOVIE', { state: { taste: tab } })
-                  }}
-                  className="px-2 py-0.5 rounded-md bg-white/5 hover:bg-teal-500/10 text-[var(--text-muted)] hover:text-teal-300 whitespace-nowrap transition"
-                >
-                  {tab}
-                </button>
-              ))}
+              <div className="flex items-center gap-1.5">
+                {tasteTabs.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      const match = MEDIA_TYPES.find(
+                        (t) =>
+                          t.label.toLowerCase().includes(String(tab).toLowerCase()) ||
+                          String(tab)
+                            .toLowerCase()
+                            .includes(t.key.toLowerCase().split('_')[0].toLowerCase())
+                      )
+                      navigate(match?.path || '/browse/MOVIE', { state: { taste: tab } })
+                    }}
+                    className="px-2.5 py-0.5 rounded-full bg-white/5 hover:bg-teal-500/15 border border-white/5 hover:border-teal-500/30 text-[var(--text-muted)] hover:text-teal-300 text-[11px] whitespace-nowrap transition duration-150"
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -256,47 +451,44 @@ export default function AppLayout() {
       {/* Mobile Drawer Slide-over Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            {/* Backdrop */}
+          <div className="fixed inset-0 z-50 md:hidden">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileMenuOpen(false)}
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/75 backdrop-blur-md"
             />
 
-            {/* Drawer Panel */}
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 240 }}
-              className="absolute top-0 right-0 bottom-0 w-4/5 max-w-xs glass-card border-l border-[var(--border)] p-5 flex flex-col justify-between overflow-y-auto shadow-2xl"
+              className="absolute top-0 right-0 bottom-0 w-4/5 max-w-xs zerog-glass border-l border-[var(--border)] p-5 flex flex-col justify-between overflow-y-auto shadow-2xl"
             >
               <div>
                 <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
                   <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-lg bg-teal-400 text-slate-950 flex items-center justify-center font-bold text-xs">
+                    <span className="w-7 h-7 rounded-xl bg-gradient-to-tr from-teal-400 to-cyan-400 text-slate-950 flex items-center justify-center font-bold text-xs">
                       Ω
                     </span>
                     <span className="font-display font-bold text-lg"><span className="text-teal-400">Omni</span>Verse</span>
                   </div>
                   <button
                     onClick={() => setMobileMenuOpen(false)}
-                    className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text)]"
+                    className="p-1.5 rounded-full text-[var(--text-muted)] hover:text-[var(--text)]"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                {/* User quick status in drawer */}
                 {user ? (
-                  <div className="mt-4 p-3 rounded-xl bg-black/15 dark:bg-white/5 border border-[var(--border)] flex items-center gap-3">
+                  <div className="mt-4 p-3 rounded-2xl bg-white/5 border border-[var(--border)] flex items-center gap-3">
                     <img
-                      src={user.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest'}
+                      src={user.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=ChuckleChief'}
                       alt=""
-                      className="w-10 h-10 rounded-full"
+                      className="w-10 h-10 rounded-full border border-teal-400/40"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="font-bold text-sm text-[var(--text)] truncate">{user.displayName}</div>
@@ -305,117 +497,128 @@ export default function AppLayout() {
                   </div>
                 ) : (
                   <div className="mt-4">
-                    <Button onClick={() => navigate('/login')} className="w-full">
+                    <Button onClick={() => navigate('/login')} className="w-full rounded-xl">
                       Sign In / Register
                     </Button>
                   </div>
                 )}
 
-                {/* Mobile Navigation Links */}
                 <div className="mt-6 space-y-1">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-2 mb-2">
-                    Community & Discussions
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-2 mb-2">
+                    Primary Hubs
                   </div>
                   <NavLink
                     to="/community"
                     onClick={() => setMobileMenuOpen(false)}
                     className={({ isActive }) =>
                       `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition ${
-                        isActive ? 'bg-teal-500/20 text-teal-300' : 'text-[var(--text)] hover:bg-white/5'
+                        isActive ? 'bg-rose-500/20 text-rose-300' : 'text-[var(--text)] hover:bg-white/5'
                       }`
                     }
                   >
                     <Flame className="w-4 h-4 text-rose-400" />
-                    <span>Reddit Community Hub</span>
-                    <span className="ml-auto text-[10px] bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded font-bold">
-                      HOT
-                    </span>
+                    <span>Community Discussions</span>
+                  </NavLink>
+                  <NavLink
+                    to="/discover"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition ${
+                        isActive ? 'bg-amber-500/20 text-amber-300' : 'text-[var(--text)] hover:bg-white/5'
+                      }`
+                    }
+                  >
+                    <Zap className="w-4 h-4 text-amber-400" />
+                    <span>OmniSwipe Matchmaker</span>
                   </NavLink>
 
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-2 mt-5 mb-2">
-                    Entertainment Catalog
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-2 mt-5 mb-2">
+                    Browse Categories
                   </div>
-                  {MEDIA_TYPES.map((t) => (
-                    <NavLink
-                      key={t.key}
-                      to={t.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition ${
-                          isActive ? 'bg-teal-500/20 text-teal-300' : 'text-[var(--text)] hover:bg-white/5'
-                        }`
-                      }
-                    >
-                      <span>{t.label}</span>
-                      <span className="text-xs text-[var(--text-muted)]">Browse →</span>
-                    </NavLink>
-                  ))}
+                  {MEDIA_TYPES.map((t) => {
+                    const Icon = CATEGORY_ICONS[t.key] || Compass
+                    return (
+                      <NavLink
+                        key={t.key}
+                        to={t.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={({ isActive }) =>
+                          `flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${
+                            isActive ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-[var(--text)] hover:bg-white/5'
+                          }`
+                        }
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <Icon className="w-3.5 h-3.5 text-teal-400" />
+                          <span>{t.label}</span>
+                        </span>
+                        <span className="text-[10px] text-[var(--text-muted)]">Explore →</span>
+                      </NavLink>
+                    )
+                  })}
                 </div>
               </div>
 
-              {/* Drawer Footer Actions */}
-              <div className="pt-4 border-t border-[var(--border)] space-y-2">
-                {user && (
-                  <>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => {
-                        navigate('/profile')
-                        setMobileMenuOpen(false)
-                      }}
-                      className="w-full justify-start gap-2"
-                    >
-                      <User className="w-4 h-4" /> Profile & Library
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        logout()
-                        navigate('/login')
-                        setMobileMenuOpen(false)
-                      }}
-                      className="w-full justify-start gap-2 text-rose-400 hover:text-rose-300"
-                    >
-                      <LogOut className="w-4 h-4" /> Sign Out
-                    </Button>
-                  </>
-                )}
-              </div>
+              {user && (
+                <div className="pt-4 border-t border-[var(--border)] space-y-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      navigate('/profile')
+                      setMobileMenuOpen(false)
+                    }}
+                    className="w-full justify-start gap-2 rounded-xl text-xs"
+                  >
+                    <User className="w-4 h-4" /> My Profile & Lists
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      logout()
+                      navigate('/login')
+                      setMobileMenuOpen(false)
+                    }}
+                    className="w-full justify-start gap-2 text-rose-400 hover:text-rose-300 rounded-xl text-xs"
+                  >
+                    <LogOut className="w-4 h-4" /> Sign Out
+                  </Button>
+                </div>
+              )}
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* Main Outlet */}
+      {/* Main Page Outlet */}
       <motion.main
         className="flex-1"
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
+        transition={{ duration: 0.25 }}
       >
         <Outlet />
       </motion.main>
 
-      {/* Footer */}
-      <footer className="border-t border-[var(--border)] py-8 text-center text-xs sm:text-sm text-[var(--text-muted)] mb-14 md:mb-0">
+      {/* Modern Compact Footer */}
+      <footer className="border-t border-[var(--border)] py-8 text-center text-xs text-[var(--text-muted)] mb-14 md:mb-0 bg-black/10">
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-display font-extrabold text-[var(--text)]">OmniVerse</span>
-            <span>· Track. Rate. Discuss across Movies, Games, Songs & Sports</span>
+            <span className="font-display font-black text-sm text-[var(--text)]">OmniVerse</span>
+            <span>· Track. Rate. Discuss. Built with Anti-Gravity UI</span>
           </div>
           <div className="flex items-center gap-4 text-xs">
             <Link to="/community" className="hover:text-teal-300 transition">Community</Link>
             <Link to="/browse/MOVIE" className="hover:text-teal-300 transition">Movies</Link>
             <Link to="/browse/GAME" className="hover:text-teal-300 transition">Games</Link>
-            <Link to="/community?channel=SPORTS" className="hover:text-teal-300 transition">Sports</Link>
+            <Link to="/discover" className="hover:text-teal-300 transition">OmniSwipe</Link>
           </div>
         </div>
       </footer>
 
-      {/* Mobile Sticky Bottom Navigation Bar (md:hidden) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass border-t border-[var(--border)] px-2 py-2 flex items-center justify-around shadow-lg">
+      {/* Mobile Sticky Bottom Navigation Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 zerog-glass border-t border-[var(--border)] px-3 py-2 flex items-center justify-around shadow-2xl">
         <NavLink
           to="/"
           className={({ isActive }) =>
@@ -490,9 +693,10 @@ export default function AppLayout() {
         </NavLink>
       </nav>
 
+      {/* Global Modals & Support Dock */}
       <GlobalSearch />
       <PersistentPlayerDock />
-      {user && <ChatWidget />}
+      <ChatWidget />
     </div>
   )
 }
