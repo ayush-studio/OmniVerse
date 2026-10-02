@@ -30,13 +30,35 @@ app.use(
   })
 );
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (!env.isProd) return true;
+  if (origin === env.clientUrl) return true;
+  try {
+    const { hostname } = new URL(origin);
+    if (hostname.endsWith('.vercel.app') || hostname === 'localhost' || hostname === '127.0.0.1') {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+};
+
 app.use(
   cors({
-    origin: env.isProd ? env.clientUrl : true,
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   })
 );
+
 
 app.use(express.json({ limit: '1mb' }));
 app.use(morgan(env.isProd ? 'combined' : 'dev'));

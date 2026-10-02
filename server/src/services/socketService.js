@@ -4,14 +4,36 @@ import { prisma } from '../config/db.js';
 import { env } from '../config/env.js';
 import { createNotification } from '../controllers/notificationController.js';
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (!env.isProd) return true;
+  if (origin === env.clientUrl) return true;
+  try {
+    const { hostname } = new URL(origin);
+    if (hostname.endsWith('.vercel.app') || hostname === 'localhost' || hostname === '127.0.0.1') {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+};
+
 export function initSocket(httpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin: env.clientUrl,
+      origin: (origin, callback) => {
+        if (isAllowedOrigin(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error(`Origin ${origin} not allowed by CORS`));
+        }
+      },
       methods: ['GET', 'POST'],
       credentials: true,
     },
   });
+
 
   io.use(async (socket, next) => {
     try {
