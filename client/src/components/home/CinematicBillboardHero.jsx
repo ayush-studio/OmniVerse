@@ -135,23 +135,23 @@ export default function CinematicBillboardHero({ items = [], onUpdate }) {
                   transition={{ duration: 0.3 }}
                   className="flex items-center gap-2.5 flex-wrap"
                 >
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-500/20 text-teal-300 border border-teal-500/40 backdrop-blur-md">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-500/10 dark:bg-teal-500/20 text-teal-800 dark:text-teal-300 border border-teal-500/30 dark:border-teal-500/40 backdrop-blur-md">
                     {typeLabel(activeItem.type)}
                   </span>
 
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 backdrop-blur-md">
-                    <Star className="w-3.5 h-3.5 fill-amber-300" />
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 dark:border-amber-500/40 flex items-center gap-1 backdrop-blur-md">
+                    <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 dark:fill-amber-300 dark:text-amber-300" />
                     {Number(activeItem.averageRating || 0).toFixed(1)}
                   </span>
 
                   {user && (
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1 backdrop-blur-md">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 backdrop-blur-md flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       {matchPercentage}% Match with your taste
                     </span>
                   )}
 
-                  <span className="text-xs text-[var(--text-muted)] font-medium">
+                  <span className="text-xs text-slate-600 dark:text-[var(--text-muted)] font-medium">
                     {activeItem.releaseYear} · {activeItem.maturityRating || 'PG-13'}
                   </span>
                 </motion.div>
@@ -165,7 +165,7 @@ export default function CinematicBillboardHero({ items = [], onUpdate }) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.4 }}
-                  className="font-display text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-[var(--text)] leading-[1.1]"
+                  className="font-display text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-[var(--text)] leading-[1.1]"
                 >
                   {activeItem.title}
                 </motion.h1>
@@ -179,7 +179,7 @@ export default function CinematicBillboardHero({ items = [], onUpdate }) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.4, delay: 0.05 }}
-                  className="text-sm sm:text-base text-[var(--text-muted)] line-clamp-3 leading-relaxed font-normal max-w-xl"
+                  className="text-sm sm:text-base text-slate-600 dark:text-[var(--text-muted)] line-clamp-3 leading-relaxed font-normal max-w-xl"
                 >
                   {activeItem.summary}
                 </motion.p>
@@ -190,7 +190,7 @@ export default function CinematicBillboardHero({ items = [], onUpdate }) {
                 {genres.slice(0, 4).map((genre) => (
                   <span
                     key={genre}
-                    className="px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-white/5 border border-white/10 text-[var(--text-muted)]"
+                    className="px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-[var(--text-muted)]"
                   >
                     {genre}
                   </span>
@@ -210,9 +210,9 @@ export default function CinematicBillboardHero({ items = [], onUpdate }) {
                 <button
                   type="button"
                   onClick={handleOpenTrailer}
-                  className="px-5 py-3 rounded-full font-semibold text-sm glass border border-white/15 hover:border-teal-400/40 text-[var(--text)] hover:text-teal-300 hover:bg-white/10 transition-all duration-200 flex items-center gap-2"
+                  className="px-5 py-3 rounded-full font-semibold text-sm bg-white/90 dark:bg-transparent glass border border-slate-300 dark:border-white/15 hover:border-teal-500/40 text-slate-800 dark:text-[var(--text)] hover:text-teal-700 dark:hover:text-teal-300 hover:bg-slate-100 dark:hover:bg-white/10 shadow-xs transition-all duration-200 flex items-center gap-2"
                 >
-                  <Play className="w-4 h-4 fill-current text-teal-400" />
+                  <Play className="w-4 h-4 fill-current text-teal-500 dark:text-teal-400" />
                   <span>Watch Trailer</span>
                 </button>
 
@@ -222,13 +222,13 @@ export default function CinematicBillboardHero({ items = [], onUpdate }) {
                   disabled={busy}
                   className={`p-3 rounded-full border transition-all duration-200 ${
                     isSaved
-                      ? 'bg-teal-500/20 text-teal-300 border-teal-500/40'
-                      : 'glass border-white/15 text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/10'
+                      ? 'bg-teal-500/15 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border-teal-500/40'
+                      : 'bg-white/90 dark:bg-transparent glass border-slate-300 dark:border-white/15 text-slate-700 dark:text-[var(--text-muted)] hover:text-slate-950 dark:hover:text-[var(--text)] hover:bg-slate-100 dark:hover:bg-white/10 shadow-xs'
                   }`}
                   aria-label={isSaved ? 'Remove from Watchlist' : 'Add to Watchlist'}
                   title={isSaved ? 'In Watchlist' : 'Add to Watchlist'}
                 >
-                  {isSaved ? <Check className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
+                  {isSaved ? <Check className="w-4 h-4 text-teal-600 dark:text-teal-300" /> : <BookmarkPlus className="w-4 h-4" />}
                 </button>
               </div>
             </div>
@@ -236,8 +236,8 @@ export default function CinematicBillboardHero({ items = [], onUpdate }) {
             {/* Right Column: Spotlight Carousel Selector & Thumbnails */}
             <div className="lg:col-span-4 flex flex-col items-start lg:items-end gap-3">
               <div className="flex items-center justify-between w-full lg:w-auto gap-4">
-                <div className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-                  <Flame className="w-3.5 h-3.5 text-rose-400" />
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-[var(--text-muted)] flex items-center gap-1.5">
+                  <Flame className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
                   <span>Trending Highlights</span>
                 </div>
 
@@ -245,14 +245,14 @@ export default function CinematicBillboardHero({ items = [], onUpdate }) {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setCurrentIndex((prev) => (prev - 1 + spotlightItems.length) % spotlightItems.length)}
-                    className="p-1.5 rounded-full glass border border-white/10 text-[var(--text-muted)] hover:text-[var(--text)] transition"
+                    className="p-1.5 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-[var(--text-muted)] hover:text-slate-950 dark:hover:text-[var(--text)] shadow-xs transition"
                     aria-label="Previous Slide"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setCurrentIndex((prev) => (prev + 1) % spotlightItems.length)}
-                    className="p-1.5 rounded-full glass border border-white/10 text-[var(--text-muted)] hover:text-[var(--text)] transition"
+                    className="p-1.5 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-[var(--text-muted)] hover:text-slate-950 dark:hover:text-[var(--text)] shadow-xs transition"
                     aria-label="Next Slide"
                   >
                     <ChevronRight className="w-4 h-4" />
@@ -273,8 +273,8 @@ export default function CinematicBillboardHero({ items = [], onUpdate }) {
                       }}
                       className={`group relative aspect-[2/3] rounded-xl overflow-hidden border transition-all duration-300 ${
                         isActive
-                          ? 'border-teal-400 ring-2 ring-teal-400/40 scale-105 shadow-[0_0_20px_rgba(20,184,166,0.5)]'
-                          : 'border-white/10 opacity-60 hover:opacity-100 hover:border-white/30'
+                          ? 'border-teal-500 ring-2 ring-teal-500/40 scale-105 shadow-[0_0_20px_rgba(20,184,166,0.4)]'
+                          : 'border-slate-300 dark:border-white/10 opacity-70 hover:opacity-100 hover:border-teal-500/60 shadow-xs'
                       }`}
                     >
                       <img
@@ -292,7 +292,7 @@ export default function CinematicBillboardHero({ items = [], onUpdate }) {
               </div>
 
               {/* Auto-rotation timer progress line */}
-              <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mt-1">
+              <div className="w-full h-1 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden mt-1">
                 <motion.div
                   key={currentIndex}
                   initial={{ width: '0%' }}

@@ -17,24 +17,26 @@
 }
 
 :root {
-  --bg: #f5f7fb;
-  --bg-elevated: rgba(255, 255, 255, 0.8);
-  --bg-card: rgba(255, 255, 255, 0.9);
-  --text: #0b1329;
+  --bg: #f8fafc;
+  --bg-elevated: rgba(255, 255, 255, 0.88);
+  --bg-card: #ffffff;
+  --text: #0f172a;
   --text-muted: #64748b;
   --border: rgba(15, 23, 42, 0.08);
-  --glow: rgba(20, 184, 166, 0.35);
-  --hero-overlay: linear-gradient(135deg, rgba(245, 247, 251, 0.94), rgba(226, 232, 240, 0.6));
+  --border-strong: rgba(15, 23, 42, 0.15);
+  --glow: rgba(13, 148, 136, 0.2);
+  --hero-overlay: linear-gradient(135deg, rgba(248, 250, 252, 0.95), rgba(241, 245, 249, 0.7));
   color-scheme: light;
 }
 
 .dark {
   --bg: #05070d;
-  --bg-elevated: rgba(10, 15, 26, 0.78);
-  --bg-card: rgba(13, 20, 36, 0.62);
+  --bg-elevated: rgba(10, 15, 26, 0.82);
+  --bg-card: rgba(13, 20, 36, 0.65);
   --text: #f1f5f9;
   --text-muted: #94a3b8;
   --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
   --glow: rgba(0, 245, 212, 0.3);
   --hero-overlay: linear-gradient(135deg, rgba(5, 7, 13, 0.96), rgba(5, 7, 13, 0.4));
   color-scheme: dark;
@@ -175,10 +177,15 @@ h3,
    ========================================================================== */
 
 .zerog-glass {
-  background: rgba(10, 16, 30, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+}
+
+.dark .zerog-glass {
+  background: rgba(10, 16, 30, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .zerog-pill {
@@ -187,11 +194,17 @@ h3,
   gap: 0.5rem;
   padding: 0.375rem 0.875rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .zerog-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .zerog-pill:hover {
@@ -284,4 +297,56 @@ h3,
     margin-right: auto;
   }
 }
+
+/* ==========================================================================
+   Light Mode Harmonious Palette & Contrast Accessibility Rules
+   ========================================================================== */
+
+:root:not(.dark) .text-teal-300 {
+  color: #0f766e !important; /* Rich deep teal (teal-700) */
+}
+
+:root:not(.dark) .text-amber-300 {
+  color: #b45309 !important; /* Crisp amber (amber-700) */
+}
+
+:root:not(.dark) .text-rose-300 {
+  color: #be123c !important; /* Deep vibrant rose (rose-700) */
+}
+
+:root:not(.dark) .text-emerald-300 {
+  color: #047857 !important; /* Emerald (emerald-700) */
+}
+
+:root:not(.dark) .text-cyan-300 {
+  color: #0e7490 !important; /* Cyan (cyan-700) */
+}
+
+:root:not(.dark) .text-sky-300 {
+  color: #0369a1 !important; /* Sky (sky-700) */
+}
+
+:root:not(.dark) .border-white\/10,
+:root:not(.dark) .border-white\/15,
+:root:not(.dark) .border-white\/20,
+:root:not(.dark) .border-white\/5 {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+:root:not(.dark) .bg-white\/5 {
+  background-color: rgba(15, 23, 42, 0.035) !important;
+}
+
+:root:not(.dark) .bg-white\/10 {
+  background-color: rgba(15, 23, 42, 0.06) !important;
+}
+
+:root:not(.dark) .hover\:bg-white\/5:hover {
+  background-color: rgba(15, 23, 42, 0.05) !important;
+}
+
+:root:not(.dark) .hover\:bg-white\/10:hover {
+  background-color: rgba(15, 23, 42, 0.08) !important;
+}
+
 

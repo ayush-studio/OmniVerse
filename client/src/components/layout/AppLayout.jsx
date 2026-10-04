@@ -138,14 +138,14 @@ export default function AppLayout() {
                   onClick={() => setBrowseDropdownOpen(!browseDropdownOpen)}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 ${
                     browseDropdownOpen || location.pathname.startsWith('/browse')
-                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-sm'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5 border border-transparent'
+                      ? 'bg-teal-500/10 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/30 dark:border-teal-500/40 shadow-sm'
+                      : 'text-slate-600 dark:text-[var(--text-muted)] hover:text-slate-900 dark:hover:text-[var(--text)] hover:bg-black/5 dark:hover:bg-white/5 border border-transparent'
                   }`}
                   aria-expanded={browseDropdownOpen}
                 >
-                  <Compass className="w-3.5 h-3.5 text-teal-400" />
+                  <Compass className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400" />
                   <span>Browse</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${browseDropdownOpen ? 'rotate-180 text-teal-300' : 'opacity-60'}`} />
+                  <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${browseDropdownOpen ? 'rotate-180 text-teal-600 dark:text-teal-300' : 'opacity-60'}`} />
                 </button>
 
                 <AnimatePresence>
@@ -155,9 +155,9 @@ export default function AppLayout() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.96 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute left-0 mt-2 w-64 p-2 rounded-2xl zerog-glass border border-[var(--border)] shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 backdrop-blur-2xl"
+                      className="absolute left-0 mt-2 w-64 p-2 rounded-2xl bg-white/95 dark:bg-[#0b101e]/95 border border-slate-200 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-50 backdrop-blur-2xl"
                     >
-                      <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                      <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-[var(--text-muted)]">
                         Explore Catalog
                       </div>
                       <div className="grid grid-cols-1 gap-1">
@@ -171,17 +171,17 @@ export default function AppLayout() {
                               onClick={() => setBrowseDropdownOpen(false)}
                               className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                                 active
-                                  ? 'bg-teal-500/20 text-teal-300 font-semibold'
-                                  : 'text-[var(--text)] hover:bg-white/5 hover:text-teal-300'
+                                  ? 'bg-teal-500/15 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 font-semibold'
+                                  : 'text-slate-700 dark:text-[var(--text)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-teal-600 dark:hover:text-teal-300'
                               }`}
                             >
-                              <div className={`p-1.5 rounded-lg ${active ? 'bg-teal-400/20 text-teal-300' : 'bg-white/5 text-[var(--text-muted)]'}`}>
+                              <div className={`p-1.5 rounded-lg ${active ? 'bg-teal-500/15 text-teal-600 dark:bg-teal-400/20 dark:text-teal-300' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-[var(--text-muted)]'}`}>
                                 <Icon className="w-3.5 h-3.5" />
                               </div>
                               <div className="flex-1">
                                 <div>{t.label}</div>
                               </div>
-                              {active && <Check className="w-3.5 h-3.5 text-teal-400" />}
+                              {active && <Check className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400" />}
                             </Link>
                           )
                         })}
@@ -197,12 +197,12 @@ export default function AppLayout() {
                 className={({ isActive }) =>
                   `px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                     isActive
-                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5 border border-transparent'
+                      ? 'bg-rose-500/10 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30 dark:border-rose-500/40 shadow-sm'
+                      : 'text-slate-600 dark:text-[var(--text-muted)] hover:text-slate-900 dark:hover:text-[var(--text)] hover:bg-black/5 dark:hover:bg-white/5 border border-transparent'
                   }`
                 }
               >
-                <Flame className="w-3.5 h-3.5 text-rose-400" />
+                <Flame className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
                 <span>Community</span>
               </NavLink>
 
@@ -212,12 +212,12 @@ export default function AppLayout() {
                 className={({ isActive }) =>
                   `px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                     isActive
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5 border border-transparent'
+                      ? 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 dark:border-amber-500/40 shadow-sm'
+                      : 'text-slate-600 dark:text-[var(--text-muted)] hover:text-slate-900 dark:hover:text-[var(--text)] hover:bg-black/5 dark:hover:bg-white/5 border border-transparent'
                   }`
                 }
               >
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
+                <Zap className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                 <span>OmniSwipe</span>
               </NavLink>
             </nav>
@@ -228,13 +228,13 @@ export default function AppLayout() {
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="w-full h-9 px-3.5 rounded-full bg-black/10 dark:bg-white/5 hover:bg-black/15 dark:hover:bg-white/10 border border-[var(--border)] hover:border-teal-500/40 text-[var(--text-muted)] hover:text-[var(--text)] text-xs flex items-center justify-between transition-all group"
+              className="w-full h-9 px-3.5 rounded-full bg-slate-100 hover:bg-slate-200/70 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-[var(--border)] hover:border-teal-500/40 text-slate-500 hover:text-slate-900 dark:text-[var(--text-muted)] dark:hover:text-[var(--text)] text-xs flex items-center justify-between transition-all group"
             >
               <span className="flex items-center gap-2">
-                <Search className="w-3.5 h-3.5 text-teal-400 group-hover:scale-110 transition-transform" />
+                <Search className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 group-hover:scale-110 transition-transform" />
                 <span className="truncate">Search 500+ titles, genres, forums…</span>
               </span>
-              <kbd className="hidden lg:inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-black/20 dark:bg-white/10 text-[10px] font-mono text-[var(--text-muted)]">
+              <kbd className="hidden lg:inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-slate-200 dark:bg-white/10 text-[10px] font-mono text-slate-600 dark:text-[var(--text-muted)]">
                 Ctrl K
               </kbd>
             </button>
@@ -250,7 +250,7 @@ export default function AppLayout() {
               aria-label="Search"
               className="sm:hidden p-2 rounded-full"
             >
-              <Search className="w-4 h-4 text-teal-400" />
+              <Search className="w-4 h-4 text-teal-500 dark:text-teal-400" />
             </Button>
 
             {/* Notifications */}
@@ -263,7 +263,7 @@ export default function AppLayout() {
                 size="sm"
                 onClick={() => navigate('/admin')}
                 title="Admin Control Center"
-                className="p-2 rounded-full text-teal-400 hover:bg-teal-500/10"
+                className="p-2 rounded-full text-teal-600 dark:text-teal-400 hover:bg-teal-500/10"
               >
                 <Shield className="w-4 h-4" />
               </Button>
@@ -275,18 +275,18 @@ export default function AppLayout() {
                 <button
                   type="button"
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-[var(--border)] hover:border-teal-500/30 transition-all duration-200"
+                  className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200/70 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-[var(--border)] hover:border-teal-500/30 transition-all duration-200"
                   aria-label="User Profile and Settings"
                 >
                   <img
                     src={user.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=ChuckleChief'}
                     alt=""
-                    className="w-7 h-7 rounded-full border border-teal-400/40 object-cover shadow-sm"
+                    className="w-7 h-7 rounded-full border border-teal-500/40 object-cover shadow-sm"
                   />
-                  <span className="hidden md:inline font-semibold text-xs text-[var(--text)] max-w-[100px] truncate">
+                  <span className="hidden md:inline font-semibold text-xs text-slate-900 dark:text-[var(--text)] max-w-[100px] truncate">
                     {user.displayName}
                   </span>
-                  <ChevronDown className={`w-3 h-3 text-[var(--text-muted)] transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180 text-teal-400' : ''}`} />
+                  <ChevronDown className={`w-3 h-3 text-slate-500 dark:text-[var(--text-muted)] transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180 text-teal-600 dark:text-teal-400' : ''}`} />
                 </button>
 
                 <AnimatePresence>
@@ -296,19 +296,19 @@ export default function AppLayout() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.96 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 mt-2 w-72 p-2 rounded-2xl zerog-glass border border-[var(--border)] shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-50 backdrop-blur-2xl"
+                      className="absolute right-0 mt-2 w-72 p-2 rounded-2xl bg-white/95 dark:bg-[#0b101e]/95 border border-slate-200 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-50 backdrop-blur-2xl"
                     >
                       {/* User Info Header */}
-                      <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex items-center gap-3 mb-2">
+                      <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 flex items-center gap-3 mb-2">
                         <img
                           src={user.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=ChuckleChief'}
                           alt=""
-                          className="w-10 h-10 rounded-full border border-teal-400/50"
+                          className="w-10 h-10 rounded-full border border-teal-500/50"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-xs truncate text-white">{user.displayName}</p>
-                          <p className="text-[10px] text-[var(--text-muted)] truncate">{user.email}</p>
-                          <span className="inline-block mt-1 text-[9px] px-1.5 py-0.2 rounded bg-teal-500/20 text-teal-300 font-bold border border-teal-500/30">
+                          <p className="font-bold text-xs truncate text-slate-900 dark:text-white">{user.displayName}</p>
+                          <p className="text-[10px] text-slate-500 dark:text-[var(--text-muted)] truncate">{user.email}</p>
+                          <span className="inline-block mt-1 text-[9px] px-1.5 py-0.2 rounded bg-teal-500/15 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 font-bold border border-teal-500/30">
                             {user.role}
                           </span>
                         </div>
@@ -318,16 +318,16 @@ export default function AppLayout() {
                       <Link
                         to="/profile"
                         onClick={() => setProfileDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[var(--text)] hover:bg-white/5 hover:text-teal-300 transition"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-[var(--text)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-teal-600 dark:hover:text-teal-300 transition"
                       >
-                        <User className="w-4 h-4 text-teal-400" />
+                        <User className="w-4 h-4 text-teal-500 dark:text-teal-400" />
                         <span>My Library & Custom Lists</span>
                       </Link>
 
-                      <div className="my-1.5 h-px bg-[var(--border)]" />
+                      <div className="my-1.5 h-px bg-slate-200 dark:bg-[var(--border)]" />
 
                       {/* Quick Preference Toggles */}
-                      <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                      <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-[var(--text-muted)]">
                         Experience Settings
                       </div>
 
@@ -335,13 +335,13 @@ export default function AppLayout() {
                       <button
                         type="button"
                         onClick={toggleAntiGravity}
-                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-[var(--text)] hover:bg-white/5 transition"
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-slate-700 dark:text-[var(--text)] hover:bg-black/5 dark:hover:bg-white/5 transition"
                       >
                         <span className="flex items-center gap-2">
-                          <Sliders className="w-3.5 h-3.5 text-teal-400" />
+                          <Sliders className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400" />
                           <span>Zero-G 3D Tilt</span>
                         </span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${enableAntiGravity ? 'bg-teal-500/20 text-teal-300' : 'bg-white/5 text-[var(--text-muted)]'}`}>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${enableAntiGravity ? 'bg-teal-500/15 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-[var(--text-muted)]'}`}>
                           {enableAntiGravity ? 'ON' : 'OFF'}
                         </span>
                       </button>
@@ -353,13 +353,13 @@ export default function AppLayout() {
                           const next = haptics.toggleSound()
                           setSoundEnabled(next)
                         }}
-                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-[var(--text)] hover:bg-white/5 transition"
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-slate-700 dark:text-[var(--text)] hover:bg-black/5 dark:hover:bg-white/5 transition"
                       >
                         <span className="flex items-center gap-2">
-                          {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-teal-400" /> : <VolumeX className="w-3.5 h-3.5 text-[var(--text-muted)]" />}
+                          {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400" /> : <VolumeX className="w-3.5 h-3.5 text-slate-400 dark:text-[var(--text-muted)]" />}
                           <span>Audio Haptics</span>
                         </span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${soundEnabled ? 'bg-teal-500/20 text-teal-300' : 'bg-white/5 text-[var(--text-muted)]'}`}>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${soundEnabled ? 'bg-teal-500/15 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-[var(--text-muted)]'}`}>
                           {soundEnabled ? 'ON' : 'OFF'}
                         </span>
                       </button>
@@ -368,18 +368,18 @@ export default function AppLayout() {
                       <button
                         type="button"
                         onClick={toggleTheme}
-                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-[var(--text)] hover:bg-white/5 transition"
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-slate-700 dark:text-[var(--text)] hover:bg-black/5 dark:hover:bg-white/5 transition"
                       >
                         <span className="flex items-center gap-2">
-                          {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-indigo-400" />}
+                          {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-indigo-500" />}
                           <span>Theme</span>
                         </span>
-                        <span className="text-[10px] font-bold capitalize text-[var(--text-muted)]">
+                        <span className="text-[10px] font-bold capitalize text-slate-500 dark:text-[var(--text-muted)]">
                           {theme}
                         </span>
                       </button>
 
-                      <div className="my-1.5 h-px bg-[var(--border)]" />
+                      <div className="my-1.5 h-px bg-slate-200 dark:bg-[var(--border)]" />
 
                       {/* Sign Out */}
                       <button
@@ -389,7 +389,7 @@ export default function AppLayout() {
                           navigate('/login')
                           setProfileDropdownOpen(false)
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 transition"
                       >
                         <LogOut className="w-3.5 h-3.5" />
                         <span>Sign Out</span>
@@ -408,20 +408,20 @@ export default function AppLayout() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-full glass border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition"
+              className="md:hidden p-2 rounded-full glass border border-slate-200 dark:border-[var(--border)] text-slate-600 dark:text-[var(--text-muted)] hover:text-slate-900 dark:hover:text-[var(--text)] transition"
               aria-label="Open mobile menu"
             >
-              {mobileMenuOpen ? <X className="w-4 h-4 text-teal-400" /> : <Menu className="w-4 h-4" />}
+              {mobileMenuOpen ? <X className="w-4 h-4 text-teal-500 dark:text-teal-400" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
         </div>
 
         {/* Refined Taste Capsule Bar */}
         {user && (
-          <div className="border-t border-[var(--border)]/60 bg-black/10 dark:bg-black/20 overflow-x-auto scrollbar-thin">
+          <div className="border-t border-slate-200 dark:border-[var(--border)]/60 bg-slate-50/90 dark:bg-black/20 backdrop-blur-md overflow-x-auto scrollbar-thin">
             <div className="mx-auto max-w-7xl px-3 sm:px-6 h-8 flex items-center gap-2 text-xs">
-              <span className="text-[var(--text-muted)] shrink-0 flex items-center gap-1 font-semibold text-[11px]">
-                <Sparkles className="w-3 h-3 text-teal-400" /> Curated for you:
+              <span className="text-slate-600 dark:text-[var(--text-muted)] shrink-0 flex items-center gap-1 font-semibold text-[11px]">
+                <Sparkles className="w-3 h-3 text-teal-500 dark:text-teal-400" /> Curated for you:
               </span>
               <div className="flex items-center gap-1.5">
                 {tasteTabs.map((tab) => (
@@ -437,7 +437,7 @@ export default function AppLayout() {
                       )
                       navigate(match?.path || '/browse/MOVIE', { state: { taste: tab } })
                     }}
-                    className="px-2.5 py-0.5 rounded-full bg-white/5 hover:bg-teal-500/15 border border-white/5 hover:border-teal-500/30 text-[var(--text-muted)] hover:text-teal-300 text-[11px] whitespace-nowrap transition duration-150"
+                    className="px-2.5 py-0.5 rounded-full bg-white dark:bg-white/5 hover:bg-teal-50 dark:hover:bg-teal-500/15 border border-slate-200 dark:border-white/5 hover:border-teal-400 dark:hover:border-teal-500/30 text-slate-700 dark:text-[var(--text-muted)] hover:text-teal-700 dark:hover:text-teal-300 text-[11px] whitespace-nowrap transition duration-150 font-medium shadow-xs"
                   >
                     {tab}
                   </button>
