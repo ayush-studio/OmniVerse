@@ -256,6 +256,24 @@ export default function AppLayout() {
             {/* Notifications */}
             {user && <NotificationBell />}
 
+            {/* Direct 1-Click Dark / Light Mode Toggle */}
+            <button
+              type="button"
+              onClick={() => {
+                haptics.playClick()
+                toggleTheme()
+              }}
+              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+              aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+              className="p-2 rounded-full border border-slate-200 dark:border-white/10 bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-all hover:scale-105 active:scale-95 shadow-xs"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-400 hover:rotate-45 transition-transform" />
+              ) : (
+                <Moon className="w-4 h-4 text-indigo-500 hover:-rotate-12 transition-transform" />
+              )}
+            </button>
+
             {/* Admin Shield (if admin) */}
             {user?.role === 'ADMIN' && (
               <Button
@@ -564,6 +582,19 @@ export default function AppLayout() {
                   <Button
                     variant="secondary"
                     size="sm"
+                    onClick={toggleTheme}
+                    className="w-full justify-between gap-2 rounded-xl text-xs"
+                  >
+                    <span className="flex items-center gap-2">
+                      {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-500" />}
+                      <span>Theme</span>
+                    </span>
+                    <span className="capitalize text-[10px] text-[var(--text-muted)] font-bold">{theme}</span>
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => {
                       navigate('/profile')
                       setMobileMenuOpen(false)
@@ -580,7 +611,7 @@ export default function AppLayout() {
                       navigate('/login')
                       setMobileMenuOpen(false)
                     }}
-                    className="w-full justify-start gap-2 text-rose-400 hover:text-rose-300 rounded-xl text-xs"
+                    className="w-full justify-start gap-2 text-rose-500 dark:text-rose-400 hover:text-rose-600 rounded-xl text-xs"
                   >
                     <LogOut className="w-4 h-4" /> Sign Out
                   </Button>
