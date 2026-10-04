@@ -19,9 +19,12 @@ api.interceptors.response.use(
   (r) => r,
   (error) => {
     if (error.response?.status === 401) {
-      const isAuthRoute = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/auth/register')
+      const isAuthRoute =
+        error.config?.url?.includes('/auth/login') ||
+        error.config?.url?.includes('/auth/register') ||
+        error.config?.url?.includes('/auth/me')
       if (!isAuthRoute && localStorage.getItem('omniverse_token')) {
-        // keep token for pages that handle 401 themselves
+        localStorage.removeItem('omniverse_token')
       }
     }
     return Promise.reject(error)
@@ -44,6 +47,7 @@ export const mediaApi = {
   byIds: (ids) => api.get('/media/by-ids', { params: { ids: ids.join(',') } }),
   get: (id) => api.get(`/media/${id}`),
   getEnrichment: (id) => api.get(`/media/${id}/enrichment`),
+  enrichment: (id) => api.get(`/media/${id}/enrichment`),
   recommendations: () => api.get('/media/recommendations'),
   library: (filter) => api.get('/media/library', { params: { filter } }),
   interact: (mediaId, data) => api.put(`/media/${mediaId}/interaction`, data),

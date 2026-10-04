@@ -18,6 +18,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import RedditPostCard from '@/components/forum/RedditPostCard'
 import CommunitySidebar from '@/components/forum/CommunitySidebar'
 import CreatePostModal from '@/components/forum/CreatePostModal'
+import CommunityDebatePoll from '@/components/forum/CommunityDebatePoll'
 import { COMMUNITY_CHANNELS, POST_TYPES } from '@/utils/cn'
 import { forumApi } from '@/services/api'
 import { useAuthStore } from '@/store'
@@ -162,6 +163,9 @@ export default function CommunityPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Main Feed Column */}
         <div className="lg:col-span-8 space-y-4">
+          {/* Interactive Community Live Debate Poll */}
+          <CommunityDebatePoll />
+
           {/* Controls Bar: Sort Tabs + Type Filter + Discussion Search */}
           <div className="glass-card rounded-2xl p-3 sm:p-4 border border-[var(--border)] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             {/* Sort Tabs */}

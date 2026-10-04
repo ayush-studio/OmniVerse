@@ -11,6 +11,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import AmbientBackdrop from '@/components/media/AmbientBackdrop'
 import VibeRadar, { VIBES } from '@/components/media/VibeRadar'
 import TasteCapsuleModal from '@/components/taste/TasteCapsuleModal'
+import CinematicBillboardHero from '@/components/home/CinematicBillboardHero'
 import { Flame, MessageSquare, ArrowRight, Sparkles, Trophy, Plus, Share2 } from 'lucide-react'
 
 export default function HomePage() {
@@ -72,8 +73,6 @@ export default function HomePage() {
       .catch(() => setContinueItems(recent))
   }, [recent])
 
-  const hero = continueItems[0] || featured[0]
-
   function patchItem(updated) {
     setFeatured((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))
     setRecommended((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))
@@ -82,89 +81,11 @@ export default function HomePage() {
 
   return (
     <div className="mobile-safe-bottom">
-      {/* Hero Section */}
-      <section className="relative min-h-[72vh] flex items-end overflow-hidden">
-        {hero && (
-          <>
-            <AmbientBackdrop imageUrl={hero.bannerImageUrl || hero.coverImageUrl} />
-            <img
-              src={hero.bannerImageUrl || hero.coverImageUrl}
-              alt=""
-              referrerPolicy="no-referrer"
-              className="absolute inset-0 w-full h-full object-cover scale-105 transition-transform duration-1000 opacity-60 mix-blend-luminosity"
-            />
-          </>
-        )}
-        <div className="absolute inset-0" style={{ background: 'var(--hero-overlay)' }} />
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-transparent to-transparent" />
-
-        <div className="relative z-10 mx-auto max-w-7xl w-full px-4 pb-16 pt-24">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/30 text-teal-300 text-xs font-semibold mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Entertainment Aggregator & Reddit-Style Community</span>
-            </div>
-
-            <p className="font-display font-display-hero text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight">
-              <span className="text-teal-400">Omni</span>Verse
-            </p>
-            <p className="mt-3 max-w-xl text-[var(--text-muted)] text-base sm:text-lg">
-              {user
-                ? `Welcome back, ${user.displayName}. Jump into trending debates, track progress, or ask anything.`
-                : 'Track, rate, and discuss movies, games, manga, sports, music, and more.'}
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {continueItems.length > 0 ? (
-                <Link to={`/media/${continueItems[0].id}`}>
-                  <Button className="shadow-lg shadow-teal-500/25">Continue · {continueItems[0].title}</Button>
-                </Link>
-              ) : (
-                <Button
-                  onClick={() => document.getElementById('trending')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="shadow-lg shadow-teal-500/25"
-                >
-                  Explore catalog
-                </Button>
-              )}
-
-              <Link to="/community">
-                <Button variant="secondary" className="gap-2">
-                  <Flame className="w-4 h-4 text-rose-400" />
-                  <span>Join Community Debates</span>
-                </Button>
-              </Link>
-
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setTasteModalOpen(true)
-                  haptics.playClick()
-                }}
-                className="gap-2 border-amber-400/40 text-amber-300 hover:bg-amber-400/10 shadow-lg shadow-amber-500/10"
-              >
-                <Sparkles className="w-4 h-4 text-amber-300" />
-                <span>Taste Capsule</span>
-              </Button>
-
-              <Button variant="outline" onClick={() => setSearchOpen(true)}>
-                Search catalog
-              </Button>
-            </div>
-
-            {hero && (
-              <Link to={`/media/${hero.id}`} className="inline-block mt-8 group">
-                <Badge>{continueItems[0] ? 'Continue watching' : 'Spotlight'}</Badge>
-                <p className="font-display text-2xl mt-1 group-hover:text-teal-300 transition">{hero.title}</p>
-                <p className="text-sm text-[var(--text-muted)]">{typeLabel(hero.type)}</p>
-              </Link>
-            )}
-          </motion.div>
-        </div>
-      </section>
+      {/* Cinematic Spotlight Hero Billboard */}
+      <CinematicBillboardHero
+        items={continueItems.length > 0 ? [...continueItems, ...featured] : featured}
+        onUpdate={patchItem}
+      />
 
       {/* Quick Category Channels Bar */}
       <section className="mx-auto max-w-7xl px-4 py-8">

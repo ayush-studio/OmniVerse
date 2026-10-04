@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { authApi } from '@/services/api'
 import { useAuthStore } from '@/store'
 import { Button, Input, Label } from '@/components/ui'
+import { haptics } from '@/utils/audioHaptics'
 
 export default function LoginPage() {
   const [mode, setMode] = useState('login')
@@ -13,16 +14,34 @@ export default function LoginPage() {
   const setAuth = useAuthStore((s) => s.setAuth)
   const navigate = useNavigate()
 
+  async function instantDemoLogin(email, password) {
+    setError('')
+    setLoading(true)
+    haptics.playClick()
+    try {
+      const { data } = await authApi.login({ email, password })
+      setAuth(data.token, data.user)
+      haptics.playFavorite()
+      navigate(data.user.onboardingComplete ? '/' : '/onboarding')
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to authenticate demo user')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   async function submit(e) {
     e.preventDefault()
     setError('')
     setLoading(true)
+    haptics.playClick()
     try {
       const { data } =
         mode === 'login'
           ? await authApi.login({ email: form.email, password: form.password })
           : await authApi.register(form)
       setAuth(data.token, data.user)
+      haptics.playFavorite()
       navigate(data.user.onboardingComplete ? '/' : '/onboarding')
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong')
@@ -127,35 +146,31 @@ export default function LoginPage() {
             </p>
             <button
               type="button"
-              onClick={() => {
-                setForm({ email: 'chuckle@omniverse.app', password: 'chuckle123', displayName: 'Chuckle Chieftain' })
-                setMode('login')
-              }}
-              className="w-full py-2 px-3 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 border border-teal-500/30 text-teal-300 text-xs font-semibold flex items-center justify-between transition"
+              disabled={loading}
+              onClick={() => instantDemoLogin('chuckle@omniverse.app', 'chuckle123')}
+              className="w-full py-2 px-3 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 border border-teal-500/30 text-teal-300 text-xs font-semibold flex items-center justify-between transition disabled:opacity-50"
             >
-              <span>👑 Chuckle Chieftain (Curated Library & Debates)</span>
-              <span className="text-[10px] bg-teal-400/20 px-1.5 py-0.5 rounded">Fill</span>
+              <span>👑 Chuckle Chieftain (Full Library & Debates)</span>
+              <span className="text-[10px] bg-teal-400/20 px-2 py-0.5 rounded font-bold">1-Click Login</span>
             </button>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  setForm({ email: 'demo@omniverse.app', password: 'user123', displayName: 'Demo Explorer' })
-                  setMode('login')
-                }}
-                className="py-1.5 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-[var(--text-muted)] hover:text-[var(--text)] text-left transition"
+                disabled={loading}
+                onClick={() => instantDemoLogin('demo@omniverse.app', 'user123')}
+                className="py-2 px-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-[var(--text-muted)] hover:text-white text-left transition flex items-center justify-between disabled:opacity-50"
               >
-                👤 Demo User
+                <span>👤 Demo User</span>
+                <span className="text-[9px] bg-white/10 px-1.5 py-0.5 rounded">Enter</span>
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setForm({ email: 'admin@omniverse.app', password: 'admin123', displayName: 'Omni Admin' })
-                  setMode('login')
-                }}
-                className="py-1.5 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-[var(--text-muted)] hover:text-[var(--text)] text-left transition"
+                disabled={loading}
+                onClick={() => instantDemoLogin('admin@omniverse.app', 'admin123')}
+                className="py-2 px-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-[var(--text-muted)] hover:text-white text-left transition flex items-center justify-between disabled:opacity-50"
               >
-                🛡️ Omni Admin
+                <span>🛡️ Omni Admin</span>
+                <span className="text-[9px] bg-white/10 px-1.5 py-0.5 rounded">Enter</span>
               </button>
             </div>
           </div>

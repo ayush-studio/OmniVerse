@@ -8,7 +8,7 @@ router.get('/', optionalAuth, media.listMedia);
 router.get('/search', optionalAuth, media.searchMedia);
 router.get('/genres', optionalAuth, media.listGenres);
 router.get('/by-ids', optionalAuth, media.getByIds);
-router.get('/recommendations', authenticate, media.getRecommendations);
+router.get('/recommendations', optionalAuth, media.getRecommendations);
 router.get('/library', authenticate, media.getUserLibrary);
 router.get('/:id', optionalAuth, media.getMedia);
 router.get('/:id/enrichment', optionalAuth, media.getMediaEnrichment);

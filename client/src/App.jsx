@@ -11,6 +11,7 @@ import LoginPage from '@/pages/LoginPage'
 import OnboardingPage from '@/pages/OnboardingPage'
 import ProfilePage from '@/pages/ProfilePage'
 import AdminPage from '@/pages/AdminPage'
+import ErrorBoundary from '@/components/ui/ErrorBoundary'
 import { useAuthStore } from '@/store'
 
 function Protected({ children, requireOnboarding = false }) {
@@ -25,7 +26,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <SocketProvider>
-        <Routes>
+        <ErrorBoundary>
+          <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route
             path="/onboarding"
@@ -62,6 +64,7 @@ export default function App() {
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </ErrorBoundary>
       </SocketProvider>
     </BrowserRouter>
   )

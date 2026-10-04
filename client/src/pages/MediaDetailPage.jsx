@@ -11,6 +11,7 @@ import StreamingProvidersCard from '@/components/media/StreamingProvidersCard'
 import AudioPreviewPlayer from '@/components/media/AudioPreviewPlayer'
 import AmbientBackdrop from '@/components/media/AmbientBackdrop'
 import { typeLabel, WISHLIST_OPTIONS, cn } from '@/utils/cn'
+import { haptics } from '@/utils/audioHaptics'
 
 export default function MediaDetailPage() {
   const { id } = useParams()
@@ -22,6 +23,7 @@ export default function MediaDetailPage() {
   const [sort, setSort] = useState('hot')
   const [postForm, setPostForm] = useState({ title: '', body: '' })
   const [rating, setRating] = useState(8)
+  const [hoverRating, setHoverRating] = useState(0)
   const [loading, setLoading] = useState(true)
   const [lists, setLists] = useState([])
   const [selectedList, setSelectedList] = useState('')
@@ -74,6 +76,13 @@ export default function MediaDetailPage() {
 
   async function interact(payload) {
     if (!user) return
+    if (payload.isFavorite) {
+      haptics.playFavorite()
+    } else if (payload.userRating) {
+      haptics.playPop()
+    } else {
+      haptics.playClick()
+    }
     const { data } = await mediaApi.interact(id, payload)
     setItem(data.item)
   }
@@ -217,23 +226,60 @@ export default function MediaDetailPage() {
             <aside className="glass rounded-2xl p-4 h-fit space-y-4">
               {user ? (
                 <>
+                  {/* Interactive 10-Star Rating Bar */}
                   <div>
-                    <p className="text-sm text-[var(--text-muted)] mb-2">Your rating (1–10)</p>
-                    <input
-                      type="range"
-                      min={1}
-                      max={10}
-                      step={0.5}
-                      value={rating}
-                      onChange={(e) => setRating(Number(e.target.value))}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="font-display text-2xl">{rating}</span>
-                      <Button size="sm" onClick={() => interact({ userRating: rating })}>
-                        Save rating
-                      </Button>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Your Rating</p>
+                      <span className="font-display font-bold text-amber-300 text-sm">
+                        {(hoverRating || rating) ? `${hoverRating || rating} / 10` : 'Not Rated'}
+                      </span>
                     </div>
+                    <div
+                      className="flex items-center gap-1 p-2 rounded-xl bg-white/5 border border-white/10 justify-between"
+                      onMouseLeave={() => setHoverRating(0)}
+                    >
+                      {Array.from({ length: 10 }, (_, i) => i + 1).map((starVal) => {
+                        const activeScore = hoverRating || rating || 0
+                        const isFilled = starVal <= activeScore
+                        return (
+                          <button
+                            key={starVal}
+                            type="button"
+                            onMouseEnter={() => setHoverRating(starVal)}
+                            onClick={() => {
+                              setRating(starVal)
+                              interact({ userRating: starVal })
+                            }}
+                            className="p-1 rounded transition transform hover:scale-125 focus:outline-none"
+                            title={`Rate ${starVal}/10`}
+                          >
+                            <Star
+                              className={cn(
+                                'w-4 h-4 transition-colors',
+                                isFilled
+                                  ? 'text-amber-300 fill-amber-300 drop-shadow-[0_0_6px_rgba(252,211,77,0.5)]'
+                                  : 'text-white/20 hover:text-amber-200'
+                              )}
+                            />
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {interaction.userRating && (
+                      <div className="flex justify-between items-center mt-2 text-xs text-teal-300">
+                        <span className="flex items-center gap-1 font-medium">✓ Saved in your library</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRating(0)
+                            interact({ userRating: null })
+                          }}
+                          className="text-[11px] text-[var(--text-muted)] hover:text-rose-400 transition"
+                        >
+                          Clear rating
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <Button
                     variant="secondary"
@@ -307,12 +353,14 @@ export default function MediaDetailPage() {
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-[var(--text-muted)]">
-                  <Link to="/login" className="text-teal-400">
-                    Sign in
-                  </Link>{' '}
-                  to rate and track.
-                </p>
+                <div className="p-1 space-y-3 text-center">
+                  <div className="p-3 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-300 text-xs font-medium leading-relaxed">
+                    Sign in to track progress, rate titles (1–10), and save to your custom lists.
+                  </div>
+                  <Link to="/login" className="block">
+                    <Button className="w-full text-xs font-semibold">Sign In / Quick Demo</Button>
+                  </Link>
+                </div>
               )}
             </aside>
           </div>

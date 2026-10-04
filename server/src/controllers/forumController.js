@@ -27,12 +27,12 @@ export async function listPosts(req, res, next) {
     if (search && search.trim()) {
       const q = search.trim();
       where.OR = [
-        { title: { contains: q } },
-        { body: { contains: q } },
+        { title: { contains: q, mode: 'insensitive' } },
+        { body: { contains: q, mode: 'insensitive' } },
       ];
     }
     if (tag && tag.trim()) {
-      where.tags = { contains: tag.trim() };
+      where.tags = { contains: tag.trim(), mode: 'insensitive' };
     }
 
     let posts = await prisma.forumPost.findMany({

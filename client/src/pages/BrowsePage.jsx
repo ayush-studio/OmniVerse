@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { mediaApi } from '@/services/api'
 import { MediaGrid } from '@/components/media/MediaCard'
+import MediaEditorialRow from '@/components/media/MediaEditorialRow'
+import MediaLedgerTable from '@/components/media/MediaLedgerTable'
 import { typeLabel, cn } from '@/utils/cn'
 import { Input, Button, Select } from '@/components/ui'
 import EmptyState from '@/components/ui/EmptyState'
+import { LayoutGrid, Rows3, Table2 } from 'lucide-react'
+import { haptics } from '@/utils/audioHaptics'
 
 const SORT_OPTIONS = [
   { value: 'rating', label: 'Top rated' },
@@ -23,6 +27,7 @@ export default function BrowsePage() {
   const [search, setSearch] = useState(params.get('q') || '')
   const [genre, setGenre] = useState(params.get('genre') || '')
   const [sort, setSort] = useState('rating')
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('omniverse_view_mode') || 'grid')
   const page = Number(params.get('page') || 1)
 
   useEffect(() => {
@@ -93,9 +98,9 @@ export default function BrowsePage() {
             Filter by genre, sort, then add titles to your library from any card
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Input
-            className="w-56"
+            className="w-48 sm:w-56"
             placeholder="Search titles…"
             value={search}
             onChange={(e) => {
@@ -110,7 +115,7 @@ export default function BrowsePage() {
             }}
           />
           <Select
-            className="w-44"
+            className="w-36 sm:w-44"
             value={sort}
             options={SORT_OPTIONS}
             onChange={(value) => {
@@ -118,6 +123,61 @@ export default function BrowsePage() {
               goToPage(1)
             }}
           />
+
+          {/* View Mode Toggle Switcher */}
+          <div className="flex items-center p-1 rounded-xl glass border border-white/10 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode('grid')
+                localStorage.setItem('omniverse_view_mode', 'grid')
+                haptics.playClick()
+              }}
+              className={cn(
+                'p-2 rounded-lg transition',
+                viewMode === 'grid'
+                  ? 'bg-teal-500/20 text-teal-300 shadow-sm border border-teal-500/30'
+                  : 'text-white/60 hover:text-white hover:bg-white/5'
+              )}
+              title="Cinematic 3D Grid"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode('editorial')
+                localStorage.setItem('omniverse_view_mode', 'editorial')
+                haptics.playClick()
+              }}
+              className={cn(
+                'p-2 rounded-lg transition',
+                viewMode === 'editorial'
+                  ? 'bg-teal-500/20 text-teal-300 shadow-sm border border-teal-500/30'
+                  : 'text-white/60 hover:text-white hover:bg-white/5'
+              )}
+              title="Editorial Detail Rows"
+            >
+              <Rows3 className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode('ledger')
+                localStorage.setItem('omniverse_view_mode', 'ledger')
+                haptics.playClick()
+              }}
+              className={cn(
+                'p-2 rounded-lg transition',
+                viewMode === 'ledger'
+                  ? 'bg-teal-500/20 text-teal-300 shadow-sm border border-teal-500/30'
+                  : 'text-white/60 hover:text-white hover:bg-white/5'
+              )}
+              title="Compact Ledger Table"
+            >
+              <Table2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -166,11 +226,31 @@ export default function BrowsePage() {
           }}
         />
       ) : (
-        <MediaGrid
-          items={items}
-          loading={loading}
-          onUpdate={(updated) => setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))}
-        />
+        <>
+          {viewMode === 'grid' && (
+            <MediaGrid
+              items={items}
+              loading={loading}
+              onUpdate={(updated) => setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))}
+            />
+          )}
+          {viewMode === 'editorial' && (
+            <MediaEditorialRow
+              items={items}
+              loading={loading}
+              onUpdate={(updated) => setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))}
+            />
+          )}
+          {viewMode === 'ledger' && (
+            <MediaLedgerTable
+              items={items}
+              loading={loading}
+              page={page}
+              limit={24}
+              onUpdate={(updated) => setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))}
+            />
+          )}
+        </>
       )}
 
       <div className="flex justify-center gap-3 mt-10">

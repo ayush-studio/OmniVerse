@@ -11,10 +11,10 @@ export async function listMedia(req, res, next) {
     if (type) where.type = String(type).toUpperCase();
     if (language) where.language = String(language);
     if (search) {
-      where.title = { contains: String(search) };
+      where.title = { contains: String(search), mode: 'insensitive' };
     }
     if (genre) {
-      where.genreTags = { contains: String(genre) };
+      where.genreTags = { contains: String(genre), mode: 'insensitive' };
     }
 
     if (req.user?.childLockEnabled) {
@@ -144,7 +144,15 @@ export async function getRecommendations(req, res, next) {
       items = scored;
     }
 
-    res.json({ items: items.slice(0, 24).map((i) => serializeMedia(i)) });
+    let interactionMap = {};
+    if (req.user) {
+      const interactions = await prisma.userMediaInteraction.findMany({
+        where: { userId: req.user.id, mediaId: { in: items.map((i) => i.id) } },
+      });
+      interactionMap = Object.fromEntries(interactions.map((i) => [i.mediaId, i]));
+    }
+
+    res.json({ items: items.slice(0, 24).map((i) => serializeMedia(i, interactionMap[i.id])) });
   } catch (err) {
     next(err);
   }
@@ -222,7 +230,13 @@ export async function searchMedia(req, res, next) {
     const q = String(req.query.q || '').trim();
     if (!q) return res.json({ groups: {}, total: 0, items: [] });
 
-    const where = { title: { contains: q } };
+    const where = {
+      OR: [
+        { title: { contains: q, mode: 'insensitive' } },
+        { genreTags: { contains: q, mode: 'insensitive' } },
+        { summary: { contains: q, mode: 'insensitive' } },
+      ],
+    };
     if (req.user?.childLockEnabled) {
       const max = req.user.maxMaturityRating || 'PG13';
       const allowed = ['G', 'PG13', 'R', 'ADULT_18'].filter((r) => canViewMaturity(max, r));
@@ -310,7 +324,7 @@ export async function getMediaEnrichment(req, res, next) {
     }
 
     const enrichment = await getMediaEnrichmentData(item);
-    res.json({ enrichment });
+    res.json({ enrichment, trailer: enrichment?.trailer });
   } catch (err) {
     next(err);
   }
