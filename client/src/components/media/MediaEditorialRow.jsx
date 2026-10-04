@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Heart, BookmarkPlus, Star, Check, Pause, X, Sparkles, Play, ArrowRight } from 'lucide-react'
+import { Heart, BookmarkPlus, Star, Check, Pause, X, Sparkles, Play, ArrowRight, MessageSquare } from 'lucide-react'
 import { mediaApi } from '@/services/api'
 import { useAuthStore } from '@/store'
 import { Badge, Button } from '@/components/ui'
@@ -120,6 +120,16 @@ export function MediaEditorialRowItem({ item, onUpdate }) {
                 {matchPercentage}% Taste Match
               </span>
               <span className="text-xs text-[var(--text-muted)] font-mono">{item.releaseYear}</span>
+              {item.discussionCount > 0 && (
+                <Link
+                  to={`/media/${item.id}?tab=discussion`}
+                  className="text-xs font-semibold text-rose-300 flex items-center gap-1 bg-rose-500/15 hover:bg-rose-500/25 px-2 py-0.5 rounded-md border border-rose-500/30 transition"
+                  title="View community debates"
+                >
+                  <MessageSquare className="w-3 h-3 text-rose-400" />
+                  <span>{item.discussionCount} {item.discussionCount === 1 ? 'Debate' : 'Debates'}</span>
+                </Link>
+              )}
             </div>
 
             <Link to={`/media/${item.id}`} className="group/link inline-block">

@@ -33,7 +33,13 @@ export async function listMedia(req, res, next) {
             : { averageRating: 'desc' };
 
     const [items, total] = await Promise.all([
-      prisma.mediaItem.findMany({ where, orderBy, skip, take }),
+      prisma.mediaItem.findMany({
+        where,
+        orderBy,
+        skip,
+        take,
+        include: { _count: { select: { forumPosts: true } } },
+      }),
       prisma.mediaItem.count({ where }),
     ]);
 
@@ -56,7 +62,10 @@ export async function listMedia(req, res, next) {
 
 export async function getMedia(req, res, next) {
   try {
-    const item = await prisma.mediaItem.findUnique({ where: { id: req.params.id } });
+    const item = await prisma.mediaItem.findUnique({
+      where: { id: req.params.id },
+      include: { _count: { select: { forumPosts: true } } },
+    });
     if (!item) return res.status(404).json({ error: 'Media not found' });
 
     if (
@@ -247,6 +256,7 @@ export async function searchMedia(req, res, next) {
       where,
       orderBy: { averageRating: 'desc' },
       take: 40,
+      include: { _count: { select: { forumPosts: true } } },
     });
 
     const groups = {};

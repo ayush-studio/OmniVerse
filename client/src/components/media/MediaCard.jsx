@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Heart, BookmarkPlus, Star, Check, Pause, X, Sparkles, Play } from 'lucide-react'
+import { Heart, BookmarkPlus, Star, Check, Pause, X, Sparkles, Play, MessageSquare } from 'lucide-react'
 import { mediaApi } from '@/services/api'
 import { useAuthStore } from '@/store'
 import { Badge } from '@/components/ui'
@@ -120,6 +120,14 @@ export default function MediaCard({ item, onUpdate }) {
                 <span className="text-xs font-semibold text-amber-300 flex items-center gap-1 bg-black/40 px-1.5 py-0.5 rounded-md backdrop-blur-sm">
                   <Star className="w-3 h-3 fill-amber-300" /> {item.averageRating?.toFixed?.(1) ?? item.averageRating}
                 </span>
+                {item.discussionCount > 0 && (
+                  <span
+                    className="text-[10px] font-semibold text-rose-300 flex items-center gap-1 bg-rose-500/20 px-1.5 py-0.5 rounded-md border border-rose-500/30 backdrop-blur-sm"
+                    title={`${item.discussionCount} active community debate${item.discussionCount === 1 ? '' : 's'}`}
+                  >
+                    <MessageSquare className="w-2.5 h-2.5 text-rose-400" /> {item.discussionCount}
+                  </span>
+                )}
               </div>
               <h3 className="font-display font-semibold text-sm leading-snug line-clamp-2 text-white group-hover:text-teal-300 transition-colors">
                 {item.title}

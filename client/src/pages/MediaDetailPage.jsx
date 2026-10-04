@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { Star, Heart, BookmarkPlus, ListPlus, Play, Film, Sparkles } from 'lucide-react'
 import { mediaApi, forumApi, listApi } from '@/services/api'
 import { useAuthStore, useRecentStore } from '@/store'
@@ -15,10 +15,11 @@ import { haptics } from '@/utils/audioHaptics'
 
 export default function MediaDetailPage() {
   const { id } = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const user = useAuthStore((s) => s.user)
   const addRecent = useRecentStore((s) => s.addRecent)
   const [item, setItem] = useState(null)
-  const [tab, setTab] = useState('overview')
+  const [tab, setTab] = useState(searchParams.get('tab') || 'overview')
   const [posts, setPosts] = useState([])
   const [sort, setSort] = useState('hot')
   const [postForm, setPostForm] = useState({ title: '', body: '' })
@@ -178,13 +179,21 @@ export default function MediaDetailPage() {
           {['overview', 'discussion'].map((t) => (
             <button
               key={t}
-              onClick={() => setTab(t)}
+              onClick={() => {
+                setTab(t)
+                setSearchParams({ tab: t })
+              }}
               className={cn(
-                'px-4 py-2 text-sm capitalize border-b-2 -mb-px transition',
+                'px-4 py-2 text-sm capitalize border-b-2 -mb-px transition flex items-center gap-1.5',
                 tab === t ? 'border-teal-400 text-teal-300' : 'border-transparent text-[var(--text-muted)]'
               )}
             >
-              {t}
+              <span>{t}</span>
+              {t === 'discussion' && item.discussionCount > 0 && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                  {item.discussionCount}
+                </span>
+              )}
             </button>
           ))}
         </div>

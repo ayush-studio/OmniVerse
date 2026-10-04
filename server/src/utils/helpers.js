@@ -17,6 +17,7 @@ export function serializeMedia(item, interaction = null) {
         : item.boxOfficeOrRank,
     genreTags: parseJson(item.genreTags, []),
     metadata: parseJson(item.metadata, {}),
+    discussionCount: item._count?.forumPosts ?? item.discussionCount ?? 0,
     interaction: interaction
       ? {
           isFavorite: interaction.isFavorite,
