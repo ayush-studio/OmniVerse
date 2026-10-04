@@ -22,7 +22,7 @@ export default function LoginPage() {
       const { data } = await authApi.login({ email, password })
       setAuth(data.token, data.user)
       haptics.playFavorite()
-      navigate(data.user.onboardingComplete ? '/' : '/onboarding')
+      navigate('/')
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to authenticate demo user')
     } finally {
@@ -42,7 +42,7 @@ export default function LoginPage() {
           : await authApi.register(form)
       setAuth(data.token, data.user)
       haptics.playFavorite()
-      navigate(data.user.onboardingComplete ? '/' : '/onboarding')
+      navigate('/')
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong')
     } finally {

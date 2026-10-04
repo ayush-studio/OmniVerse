@@ -120,6 +120,10 @@ export async function completeOnboarding(req, res, next) {
       maxMaturityRating,
     } = req.body;
 
+    if (!req.user?.id) {
+      return res.json({ ok: true, message: 'Preferences noted for session' });
+    }
+
     const data = {
       onboardingComplete: true,
       avatarUrl: avatarUrl || null,

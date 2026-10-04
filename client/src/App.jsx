@@ -14,11 +14,10 @@ import AdminPage from '@/pages/AdminPage'
 import ErrorBoundary from '@/components/ui/ErrorBoundary'
 import { useAuthStore } from '@/store'
 
-function Protected({ children, requireOnboarding = false }) {
+function Protected({ children }) {
   const user = useAuthStore((s) => s.user)
   const token = useAuthStore((s) => s.token)
   if (!token || !user) return <Navigate to="/login" replace />
-  if (requireOnboarding && !user.onboardingComplete) return <Navigate to="/onboarding" replace />
   return children
 }
 
