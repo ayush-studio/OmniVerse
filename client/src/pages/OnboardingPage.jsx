@@ -5,6 +5,8 @@ import { authApi } from '@/services/api'
 import { useAuthStore } from '@/store'
 import { AVATAR_PRESETS, TASTE_TAGS, FORMAT_OPTIONS, cn } from '@/utils/cn'
 import { Button, Input, Label, Textarea, Select } from '@/components/ui'
+import { ArrowRight, Sparkles } from 'lucide-react'
+import { haptics } from '@/utils/audioHaptics'
 
 export default function OnboardingPage() {
   const setUser = useAuthStore((s) => s.setUser)
@@ -27,6 +29,7 @@ export default function OnboardingPage() {
 
   async function finish() {
     setLoading(true)
+    haptics.playClick()
     try {
       const { data } = await authApi.onboarding({
         avatarUrl,
@@ -37,6 +40,14 @@ export default function OnboardingPage() {
         maxMaturityRating,
       })
       setUser(data.user)
+      haptics.playFavorite()
+      navigate('/')
+    } catch (err) {
+      console.warn('Onboarding update non-critical error, continuing to home:', err?.message)
+      const currentUser = useAuthStore.getState().user
+      if (currentUser) {
+        setUser({ ...currentUser, onboardingComplete: true })
+      }
       navigate('/')
     } finally {
       setLoading(false)
@@ -50,9 +61,20 @@ export default function OnboardingPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-2xl glass rounded-3xl p-8"
       >
-        <p className="font-display text-2xl font-bold">
-          Build your <span className="text-teal-400">persona</span>
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="font-display text-2xl font-bold">
+            Build your <span className="text-teal-400">persona</span>
+          </p>
+          <button
+            type="button"
+            onClick={finish}
+            className="text-xs text-[var(--text-muted)] hover:text-teal-300 transition flex items-center gap-1.5 py-1 px-2.5 rounded-lg hover:bg-white/5"
+            title="Skip preference setup"
+          >
+            <span>Skip for now</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
         <div className="flex gap-2 mt-4 mb-8">
           {steps.map((s, i) => (
             <div

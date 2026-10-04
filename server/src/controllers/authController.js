@@ -61,6 +61,7 @@ export async function register(req, res, next) {
         passwordHash,
         displayName: String(displayName).trim().slice(0, 60),
         avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(displayName)}`,
+        onboardingComplete: true,
         tasteProfile: JSON.stringify({
           formats: ['Games', 'Movies', 'Series', 'Music', 'Sports', 'Anime'],
           genres: ['AAA Story Games', 'Action Movies', 'Sci-Fi', 'Anime', 'Thriller Series'],
@@ -68,8 +69,8 @@ export async function register(req, res, next) {
       },
     });
 
-    // Automatically seed games, movies, songs, sports, and custom lists for new users
-    await seedUserStarterData(user.id);
+    // Asynchronously seed games, movies, songs, and custom lists in background
+    seedUserStarterData(user.id).catch((err) => console.error('Background seed error:', err));
 
     const token = signToken(user);
     res.status(201).json({ token, user: serializeUser(user) });

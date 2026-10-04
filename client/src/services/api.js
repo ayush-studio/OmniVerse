@@ -10,7 +10,16 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('omniverse_token')
+  let token = localStorage.getItem('omniverse_token')
+  if (!token) {
+    try {
+      const parsed = JSON.parse(localStorage.getItem('omniverse-auth') || '{}')
+      token = parsed?.state?.token
+      if (token) localStorage.setItem('omniverse_token', token)
+    } catch {
+      // ignore
+    }
+  }
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
@@ -18,14 +27,9 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (r) => r,
   (error) => {
-    if (error.response?.status === 401) {
-      const isAuthRoute =
-        error.config?.url?.includes('/auth/login') ||
-        error.config?.url?.includes('/auth/register') ||
-        error.config?.url?.includes('/auth/me')
-      if (!isAuthRoute && localStorage.getItem('omniverse_token')) {
-        localStorage.removeItem('omniverse_token')
-      }
+    // Only clear token when explicit session validation fails
+    if (error.response?.status === 401 && error.config?.url?.includes('/auth/me')) {
+      localStorage.removeItem('omniverse_token')
     }
     return Promise.reject(error)
   }
