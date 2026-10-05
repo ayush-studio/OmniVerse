@@ -132,7 +132,7 @@ export default function MediaDetailPage() {
           <div className="flex-1 pb-1">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
               <Badge>{typeLabel(item.type)}</Badge>
-              {(item.type === 'MOVIE' || item.type === 'SERIES' || item.type === 'GAME') && (
+              {(item.type === 'MOVIE' || item.type === 'SERIES' || item.type === 'GAME') ? (
                 <Button
                   size="sm"
                   onClick={() => {
@@ -153,7 +153,28 @@ export default function MediaDetailPage() {
                   <Play className="w-3.5 h-3.5 fill-current" />
                   <span>{item.type === 'GAME' ? 'Gameplay Trailer' : 'Watch Trailer'}</span>
                 </Button>
-              )}
+              ) : item.type === 'MUSIC_ALBUM' ? (
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const audioUrl =
+                      enrichment?.audioPreview ||
+                      enrichment?.previewUrl ||
+                      'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/1b/49/7f/1b497f6c-84cb-6020-f5a4-927914a8497d/mzaf_10793544320498779691.plus.aac.p.m4a'
+                    usePlayerStore.getState().playAudio({
+                      trackName: item.title,
+                      artistName: item.language || 'Featured Album',
+                      audioUrl,
+                      coverUrl: item.coverImageUrl,
+                      mediaId: item.id,
+                    })
+                  }}
+                  className="gap-2 shadow-lg bg-teal-400 hover:bg-teal-300 text-slate-950 font-bold border-0"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>Listen Preview</span>
+                </Button>
+              ) : null}
             </div>
             <h1 className="font-display text-3xl sm:text-5xl font-extrabold">{item.title}</h1>
             <p className="text-[var(--text-muted)] mt-2 flex flex-wrap gap-3 text-sm">
