@@ -1,9 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ExternalLink, Play, Film } from 'lucide-react'
 import { Button } from '@/components/ui'
 
 export default function TrailerModal({ isOpen, onClose, trailer, title, type }) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === 'Escape') onClose()
@@ -18,31 +25,32 @@ export default function TrailerModal({ isOpen, onClose, trailer, title, type }) 
     }
   }, [isOpen, onClose])
 
-  if (!isOpen) return null
+  if (!mounted || typeof document === 'undefined') return null
 
   const isGame = type === 'GAME'
   const modalTitle = isGame ? `${title} — Gameplay Trailer` : `${title} — Official Trailer`
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 md:p-10">
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/85 backdrop-blur-md"
-          onClick={onClose}
-        />
+      {isOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 md:p-10 pointer-events-auto">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/85 backdrop-blur-md"
+            onClick={onClose}
+          />
 
-        {/* Modal Window */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          transition={{ duration: 0.2 }}
-          className="relative z-10 w-full max-w-5xl rounded-3xl overflow-hidden glass border border-white/15 bg-slate-950/95 shadow-2xl flex flex-col"
-        >
+          {/* Modal Window */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ duration: 0.2 }}
+            className="relative z-10 w-full max-w-5xl rounded-3xl overflow-hidden glass border border-white/15 bg-slate-950/95 shadow-2xl flex flex-col"
+          >
           {/* Header */}
           <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between gap-4">
             <div className="flex items-center gap-2.5 truncate">
@@ -127,6 +135,8 @@ export default function TrailerModal({ isOpen, onClose, trailer, title, type }) 
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+      )}
+    </AnimatePresence>,
+    document.body
   )
 }

@@ -116,10 +116,10 @@ export async function createMedia(req, res, next) {
         boxOfficeOrRank: BigInt(boxOfficeOrRank || 0),
         coverImageUrl:
           coverImageUrl ||
-          `https://picsum.photos/seed/${encodeURIComponent(title)}/400/600`,
+          `https://placehold.co/400x600/0b0f19/14b8a6/png?text=${encodeURIComponent(title.slice(0, 20))}`,
         bannerImageUrl:
           bannerImageUrl ||
-          `https://picsum.photos/seed/${encodeURIComponent(title)}-banner/1400/500`,
+          `https://placehold.co/1200x500/0b0f19/38bdf8/png?text=${encodeURIComponent(title.slice(0, 20))}`,
         releaseYear: Number(releaseYear),
         language,
         maturityRating,
@@ -184,10 +184,10 @@ export async function bulkImportMedia(req, res, next) {
           boxOfficeOrRank: BigInt(raw.boxOfficeOrRank || 0),
           coverImageUrl:
             raw.coverImageUrl ||
-            `https://picsum.photos/seed/${encodeURIComponent(raw.title)}/400/600`,
+            `https://placehold.co/400x600/0b0f19/14b8a6/png?text=${encodeURIComponent(raw.title.slice(0, 20))}`,
           bannerImageUrl:
             raw.bannerImageUrl ||
-            `https://picsum.photos/seed/${encodeURIComponent(raw.title)}-b/1400/500`,
+            `https://placehold.co/1200x500/0b0f19/38bdf8/png?text=${encodeURIComponent(raw.title.slice(0, 20))}`,
           releaseYear: Number(raw.releaseYear),
           language: raw.language || 'English',
           maturityRating: raw.maturityRating || 'PG13',
