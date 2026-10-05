@@ -5,7 +5,7 @@ import { mediaApi, forumApi, listApi } from '@/services/api'
 import { useAuthStore, useRecentStore } from '@/store'
 import { usePlayerStore } from '@/store/playerStore'
 import { Badge, Button, Textarea, Input, Skeleton, Select } from '@/components/ui'
-import { PostCard } from '@/components/forum/Forum'
+import RedditPostCard from '@/components/forum/RedditPostCard'
 import TrailerModal from '@/components/media/TrailerModal'
 import StreamingProvidersCard from '@/components/media/StreamingProvidersCard'
 import AudioPreviewPlayer from '@/components/media/AudioPreviewPlayer'
@@ -378,40 +378,110 @@ export default function MediaDetailPage() {
         {tab === 'discussion' && (
           <div className="space-y-6">
             <div className="flex flex-wrap gap-2 items-center justify-between">
-              <h2 className="font-display text-xl font-bold">Community forum</h2>
-              <div className="flex gap-2">
-                {['hot', 'top', 'new', 'controversial'].map((s) => (
-                  <Button key={s} size="sm" variant={sort === s ? 'primary' : 'ghost'} onClick={() => setSort(s)}>
+              <div>
+                <h2 className="font-display text-xl font-bold flex items-center gap-2">
+                  <span>Community Debates & Discussions</span>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/30 font-semibold">
+                    {posts.length} {posts.length === 1 ? 'Topic' : 'Topics'}
+                  </span>
+                </h2>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  Theories, hot takes, spoilers, and reviews for {item.title}
+                </p>
+              </div>
+
+              <div className="flex gap-1.5 p-1 rounded-xl glass border border-[var(--border)]">
+                {['hot', 'top', 'new', 'comments'].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => {
+                      haptics.playClick()
+                      setSort(s)
+                    }}
+                    className={cn(
+                      'px-3 py-1 rounded-lg text-xs font-semibold capitalize transition',
+                      sort === s
+                        ? 'bg-teal-500 text-slate-950 font-bold shadow-xs'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-black/5 dark:hover:bg-white/5'
+                    )}
+                  >
                     {s}
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>
 
-            {user && (
-              <form onSubmit={createPost} className="glass rounded-2xl p-4 space-y-3">
+            {user ? (
+              <form onSubmit={createPost} className="glass rounded-2xl p-5 space-y-4 border border-[var(--border)]">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+                    Start a New Debate or Discussion
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {['DISCUSSION', 'HOT_TAKE', 'THEORY', 'REVIEW'].map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setPostForm({ ...postForm, postType: t })}
+                        className={cn(
+                          'px-2 py-0.5 rounded-md text-[10px] font-bold uppercase transition border',
+                          (postForm.postType || 'DISCUSSION') === t
+                            ? 'bg-teal-500/20 text-teal-700 dark:text-teal-300 border-teal-500/40 shadow-xs'
+                            : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
+                        )}
+                      >
+                        {t.replace('_', ' ')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <Input
-                  placeholder="Post title"
+                  placeholder="Debate topic or title (e.g. 'Is the climax better than the original?')"
                   value={postForm.title}
                   onChange={(e) => setPostForm({ ...postForm, title: e.target.value })}
                   required
                 />
                 <Textarea
-                  placeholder="Write in markdown…"
+                  placeholder="Share your perspective, arguments, or critique (Markdown supported; use >!spoiler!< for hidden spoilers)…"
                   value={postForm.body}
                   onChange={(e) => setPostForm({ ...postForm, body: e.target.value })}
                   required
                 />
-                <Button type="submit">Create post</Button>
+                <div className="flex justify-end">
+                  <Button type="submit" size="sm" className="px-5 font-semibold">
+                    Publish Debate
+                  </Button>
+                </div>
               </form>
+            ) : (
+              <div className="glass rounded-2xl p-5 text-center border border-[var(--border)]">
+                <p className="text-xs text-[var(--text-muted)] mb-2">Sign in to publish debate topics, vote on theories, and leave replies.</p>
+                <Link to="/login">
+                  <Button size="sm" className="text-xs">Sign In / Demo Login</Button>
+                </Link>
+              </div>
             )}
 
             <div className="space-y-3">
               {posts.map((p) => (
-                <PostCard key={p.id} post={p} onOpen={(post) => (window.location.href = `/forum/${post.id}`)} />
+                <RedditPostCard
+                  key={p.id}
+                  post={p}
+                  onVoteChange={(postId, updated) => {
+                    setPosts((prev) => prev.map((x) => (x.id === postId ? { ...x, ...updated } : x)))
+                  }}
+                />
               ))}
               {!posts.length && (
-                <p className="text-center text-[var(--text-muted)] py-8">No posts yet — start the thread.</p>
+                <div className="glass rounded-2xl p-10 text-center border border-[var(--border)]">
+                  <p className="font-display font-semibold text-base mb-1">No community debates yet</p>
+                  <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
+                    Be the first to spark a discussion, post a review, or share a hot take about {item.title}!
+                  </p>
+                </div>
               )}
             </div>
           </div>

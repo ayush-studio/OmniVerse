@@ -101,9 +101,21 @@ export async function createPost(req, res, next) {
       return res.status(400).json({ error: 'Title and body are required' });
     }
 
+    let finalCategory = (category || 'GENERAL').toUpperCase();
     if (mediaId) {
       const media = await prisma.mediaItem.findUnique({ where: { id: mediaId } });
       if (!media) return res.status(404).json({ error: 'Media not found' });
+      if (finalCategory === 'GENERAL') {
+        const catMap = {
+          MOVIE: 'MOVIES',
+          SERIES: 'SERIES',
+          GAME: 'GAMES',
+          MUSIC_ALBUM: 'MUSIC',
+          BOOK: 'BOOKS',
+          MANGA: 'MANGA',
+        };
+        finalCategory = catMap[media.type] || 'GENERAL';
+      }
     }
 
     const parsedTags = Array.isArray(tags) ? JSON.stringify(tags) : typeof tags === 'string' ? tags : '[]';
@@ -114,7 +126,7 @@ export async function createPost(req, res, next) {
         authorId: req.user.id,
         title: title.trim(),
         body: body.trim(),
-        category: category.toUpperCase(),
+        category: finalCategory,
         postType: postType.toUpperCase(),
         tags: parsedTags,
       },
