@@ -4,6 +4,11 @@ import { authenticate, optionalAuth } from '../middleware/auth.js';
 
 const router = Router();
 
+router.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  next();
+});
+
 router.get('/', optionalAuth, media.listMedia);
 router.get('/search', optionalAuth, media.searchMedia);
 router.get('/genres', optionalAuth, media.listGenres);

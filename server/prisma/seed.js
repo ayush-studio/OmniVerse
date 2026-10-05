@@ -1,3 +1,4 @@
+import { execSync } from 'child_process';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 import seed from './seedData.js';
@@ -5,10 +6,10 @@ import seed from './seedData.js';
 const prisma = new PrismaClient();
 
 function cover(title) {
-  return `https://picsum.photos/seed/${encodeURIComponent(title)}/400/600`;
+  return `https://placehold.co/400x600/0f172a/14b8a6/png?text=${encodeURIComponent(title.slice(0, 24))}`;
 }
 function banner(title) {
-  return `https://picsum.photos/seed/${encodeURIComponent(title)}-banner/1400/500`;
+  return `https://placehold.co/1200x500/0f172a/38bdf8/png?text=${encodeURIComponent(title.slice(0, 24))}`;
 }
 
 async function main() {
@@ -136,6 +137,13 @@ async function main() {
   }
 
   console.log('Seed complete.');
+  console.log('Enriching media with official CDN artwork...');
+  try {
+    execSync('node prisma/updateAllMediaArt.js', { stdio: 'inherit' });
+  } catch (err) {
+    console.warn('Artwork enrichment warning:', err.message);
+  }
+
   console.log('Accounts:');
   console.log('  admin@omniverse.app / admin123');
   console.log('  support@omniverse.app / support123');
