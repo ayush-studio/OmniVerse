@@ -308,8 +308,8 @@ async function main() {
     try {
       const art = await resolveArt(item);
       if (art && art.cover) {
-        await prisma.mediaItem.update({
-          where: { id: item.id },
+        await prisma.mediaItem.updateMany({
+          where: { title: item.title, type: item.type },
           data: {
             coverImageUrl: art.cover,
             bannerImageUrl: art.banner || art.cover,
