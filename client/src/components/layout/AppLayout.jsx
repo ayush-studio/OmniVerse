@@ -637,7 +637,7 @@ export default function AppLayout() {
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="font-display font-black text-sm text-[var(--text)]">OmniVerse</span>
-            <span>· Track. Rate. Discuss. Built with Anti-Gravity UI</span>
+            <span>· Track. Rate. Discuss. Connect.</span>
           </div>
           <div className="flex items-center gap-4 text-xs">
             <Link to="/community" className="hover:text-teal-300 transition">Community</Link>
