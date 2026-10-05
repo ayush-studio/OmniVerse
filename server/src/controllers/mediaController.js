@@ -26,11 +26,15 @@ export async function listMedia(req, res, next) {
     const orderBy =
       sort === 'year'
         ? { releaseYear: 'desc' }
-        : sort === 'title'
-          ? { title: 'asc' }
-          : sort === 'rank'
-            ? { boxOfficeOrRank: 'desc' }
-            : { averageRating: 'desc' };
+        : sort === 'oldest'
+          ? { releaseYear: 'asc' }
+          : sort === 'title'
+            ? { title: 'asc' }
+            : sort === 'rank'
+              ? { boxOfficeOrRank: 'desc' }
+              : sort === 'debates'
+                ? { forumPosts: { _count: 'desc' } }
+                : { averageRating: 'desc' };
 
     const [items, total] = await Promise.all([
       prisma.mediaItem.findMany({

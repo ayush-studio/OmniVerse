@@ -12,8 +12,10 @@ import { haptics } from '@/utils/audioHaptics'
 
 const SORT_OPTIONS = [
   { value: 'rating', label: 'Top rated' },
+  { value: 'debates', label: '💬 Most Discussed' },
   { value: 'year', label: 'Newest' },
-  { value: 'title', label: 'Title' },
+  { value: 'oldest', label: 'Classics / Oldest' },
+  { value: 'title', label: 'Title (A-Z)' },
   { value: 'rank', label: 'Rank / Gross' },
 ]
 
@@ -36,7 +38,7 @@ export default function BrowsePage() {
   }, [type])
 
   useEffect(() => {
-    mediaApi.genres(type?.toUpperCase()).then((r) => setGenres((r.data.genres || []).slice(0, 18)))
+    mediaApi.genres(type?.toUpperCase()).then((r) => setGenres((r.data.genres || []).slice(0, 36)))
   }, [type])
 
   useEffect(() => {
