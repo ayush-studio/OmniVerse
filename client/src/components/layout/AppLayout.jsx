@@ -37,6 +37,7 @@ import ChatWidget from '@/components/chat/ChatWidget'
 import GlobalSearch from '@/components/layout/GlobalSearch'
 import NotificationBell from '@/components/layout/NotificationBell'
 import PersistentPlayerDock from '@/components/media/PersistentPlayerDock'
+import VibeMixerModal from '@/components/home/VibeMixerModal'
 
 const CATEGORY_ICONS = {
   MOVIE: Film,
@@ -55,6 +56,8 @@ export default function AppLayout() {
     setSearchOpen,
     enableAntiGravity,
     toggleAntiGravity,
+    vibeMixerOpen,
+    setVibeMixerOpen,
   } = useUiStore()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -220,6 +223,19 @@ export default function AppLayout() {
                 <Zap className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                 <span>OmniSwipe</span>
               </NavLink>
+
+              {/* Vibe Mixer Modal Trigger */}
+              <button
+                type="button"
+                onClick={() => {
+                  haptics.playPop()
+                  setVibeMixerOpen(true)
+                }}
+                className="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all duration-200 flex items-center gap-1.5 text-slate-600 dark:text-[var(--text-muted)] hover:text-teal-600 dark:hover:text-teal-300 hover:bg-teal-500/10 dark:hover:bg-teal-500/15 border border-transparent hover:border-teal-500/30 cursor-pointer"
+              >
+                <Sliders className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400" />
+                <span>Vibe Mixer</span>
+              </button>
             </nav>
           </div>
 
@@ -550,6 +566,19 @@ export default function AppLayout() {
                     <span>OmniSwipe Matchmaker</span>
                   </NavLink>
 
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      haptics.playPop()
+                      setVibeMixerOpen(true)
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-teal-300 bg-teal-500/15 border border-teal-500/30 transition text-left"
+                  >
+                    <Sliders className="w-4 h-4 text-teal-400" />
+                    <span>Vibe Mixer Decision Engine</span>
+                  </button>
+
                   <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-2 mt-5 mb-2">
                     Browse Categories
                   </div>
@@ -728,6 +757,7 @@ export default function AppLayout() {
       <GlobalSearch />
       <PersistentPlayerDock />
       <ChatWidget />
+      <VibeMixerModal isOpen={vibeMixerOpen} onClose={() => setVibeMixerOpen(false)} />
     </div>
   )
 }

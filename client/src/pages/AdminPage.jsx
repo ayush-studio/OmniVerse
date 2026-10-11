@@ -24,12 +24,14 @@ export default function AdminPage() {
     averageRating: 8,
   })
   const [tab, setTab] = useState('overview')
+  const [forumPosts, setForumPosts] = useState([])
 
   useEffect(() => {
     if (user?.role !== 'ADMIN') return
     adminApi.stats().then((r) => setStats(r.data.stats))
     adminApi.users().then((r) => setUsers(r.data.users))
     chatApi.rooms().then((r) => setRooms(r.data.rooms || []))
+    adminApi.forumPosts({ limit: 40 }).then((r) => setForumPosts(r.data.posts || []))
   }, [user])
 
   useEffect(() => {
@@ -97,9 +99,9 @@ export default function AdminPage() {
     <div className="mx-auto max-w-7xl px-4 py-8">
       <h1 className="font-display text-3xl font-bold mb-6">Admin dashboard</h1>
       <div className="flex flex-wrap gap-2 mb-6">
-        {['overview', 'media', 'users', 'support'].map((t) => (
+        {['overview', 'media', 'users', 'moderation', 'support'].map((t) => (
           <Button key={t} size="sm" variant={tab === t ? 'primary' : 'ghost'} onClick={() => setTab(t)}>
-            {t}
+            {t === 'moderation' ? 'Content Safety & Moderation' : t}
           </Button>
         ))}
       </div>
@@ -209,25 +211,105 @@ export default function AdminPage() {
                   </td>
                   <td className="p-3">{u.role}</td>
                   <td className="p-3">
-                    <Select
-                      className="min-w-[140px]"
-                      value={u.role}
-                      options={[
-                        { value: 'USER', label: 'USER' },
-                        { value: 'ADMIN', label: 'ADMIN' },
-                        { value: 'SUPPORT_AGENT', label: 'SUPPORT_AGENT' },
-                      ]}
-                      onChange={async (role) => {
-                        await adminApi.setRole(u.id, role)
-                        const r = await adminApi.users()
-                        setUsers(r.data.users)
-                      }}
-                    />
+                    <div className="flex items-center gap-2">
+                      <Select
+                        className="min-w-[140px]"
+                        value={u.role}
+                        options={[
+                          { value: 'USER', label: 'USER' },
+                          { value: 'ADMIN', label: 'ADMIN' },
+                          { value: 'SUPPORT_AGENT', label: 'SUPPORT_AGENT' },
+                        ]}
+                        onChange={async (role) => {
+                          await adminApi.setRole(u.id, role)
+                          const r = await adminApi.users()
+                          setUsers(r.data.users)
+                        }}
+                      />
+                      {u.id !== user.id && (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={async () => {
+                            if (confirm(`Permanently remove user account "${u.email}"?`)) {
+                              await adminApi.deleteUser(u.id)
+                              const r = await adminApi.users()
+                              setUsers(r.data.users)
+                            }
+                          }}
+                          className="text-xs shrink-0"
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {tab === 'moderation' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold font-display">Content Safety & Forum Moderation</h2>
+              <p className="text-xs text-[var(--text-muted)]">
+                Audit and remove any forum threads, discussions, or reviews that violate safety guidelines.
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={async () => {
+                const r = await adminApi.forumPosts({ limit: 40 })
+                setForumPosts(r.data.posts || [])
+              }}
+            >
+              Refresh Feed
+            </Button>
+          </div>
+
+          <div className="glass rounded-2xl overflow-hidden divide-y divide-[var(--border)]">
+            {forumPosts.map((p) => (
+              <div key={p.id} className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="space-y-1 max-w-3xl">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-500/10 text-teal-300 border border-teal-500/20">
+                      {p.category}
+                    </span>
+                    <span className="font-bold text-sm text-white">{p.title}</span>
+                  </div>
+                  <p className="text-xs text-[var(--text-muted)] line-clamp-2">{p.body}</p>
+                  <div className="text-[11px] text-slate-500 flex items-center gap-3">
+                    <span>Author: {p.author?.displayName || 'Unknown'}</span>
+                    <span>•</span>
+                    <span>{new Date(p.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={async () => {
+                    if (confirm(`Permanently remove discussion "${p.title}" for safety policy violation?`)) {
+                      await adminApi.deleteForumPost(p.id)
+                      setForumPosts((prev) => prev.filter((x) => x.id !== p.id))
+                    }
+                  }}
+                  className="shrink-0 text-xs"
+                >
+                  Remove Post
+                </Button>
+              </div>
+            ))}
+            {!forumPosts.length && (
+              <div className="p-8 text-center text-sm text-[var(--text-muted)]">
+                No active discussions found. All current content complies with community safety standards.
+              </div>
+            )}
+          </div>
         </div>
       )}
 

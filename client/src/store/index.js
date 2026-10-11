@@ -30,6 +30,7 @@ export const useUiStore = create(
       theme: 'dark',
       chatOpen: false,
       searchOpen: false,
+      vibeMixerOpen: false,
       enableAntiGravity: true,
       reducedMotion: false,
       setTheme: (theme) => {
@@ -46,6 +47,8 @@ export const useUiStore = create(
       toggleChat: () => set((s) => ({ chatOpen: !s.chatOpen })),
       setSearchOpen: (searchOpen) => set({ searchOpen }),
       toggleSearch: () => set((s) => ({ searchOpen: !s.searchOpen })),
+      setVibeMixerOpen: (vibeMixerOpen) => set({ vibeMixerOpen }),
+      toggleVibeMixer: () => set((s) => ({ vibeMixerOpen: !s.vibeMixerOpen })),
       toggleAntiGravity: () => set((s) => ({ enableAntiGravity: !s.enableAntiGravity })),
       setReducedMotion: (reducedMotion) => set({ reducedMotion }),
     }),

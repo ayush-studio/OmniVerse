@@ -21,6 +21,14 @@ function Protected({ children }) {
   return children
 }
 
+function AdminProtected({ children }) {
+  const user = useAuthStore((s) => s.user)
+  const token = useAuthStore((s) => s.token)
+  if (!token || !user) return <Navigate to="/login" replace />
+  if (user.role !== 'ADMIN') return <Navigate to="/" replace />
+  return children
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -47,7 +55,7 @@ export default function App() {
             <Route
               path="/profile"
               element={
-                <Protected requireOnboarding>
+                <Protected>
                   <ProfilePage />
                 </Protected>
               }
@@ -55,9 +63,9 @@ export default function App() {
             <Route
               path="/admin"
               element={
-                <Protected requireOnboarding>
+                <AdminProtected>
                   <AdminPage />
-                </Protected>
+                </AdminProtected>
               }
             />
           </Route>

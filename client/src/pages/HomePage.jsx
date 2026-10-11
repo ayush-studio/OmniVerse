@@ -12,12 +12,13 @@ import AmbientBackdrop from '@/components/media/AmbientBackdrop'
 import VibeRadar, { VIBES } from '@/components/media/VibeRadar'
 import TasteCapsuleModal from '@/components/taste/TasteCapsuleModal'
 import CinematicBillboardHero from '@/components/home/CinematicBillboardHero'
-import { Flame, MessageSquare, ArrowRight, Sparkles, Trophy, Plus, Share2 } from 'lucide-react'
+import { Flame, MessageSquare, ArrowRight, Sparkles, Trophy, Plus, Share2, Sliders } from 'lucide-react'
 
 export default function HomePage() {
   const user = useAuthStore((s) => s.user)
   const recent = useRecentStore((s) => s.recent)
   const setSearchOpen = useUiStore((s) => s.setSearchOpen)
+  const setVibeMixerOpen = useUiStore((s) => s.setVibeMixerOpen)
   const [featured, setFeatured] = useState([])
   const [recommended, setRecommended] = useState([])
   const [continueItems, setContinueItems] = useState([])
@@ -200,6 +201,42 @@ export default function HomePage() {
           )}
         </section>
       )}
+
+      {/* Vibe Mixer Spotlight Card */}
+      <section className="mx-auto max-w-7xl px-4 pb-12">
+        <div className="relative rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-teal-950/60 via-slate-900/80 to-indigo-950/60 border border-teal-500/30 overflow-hidden shadow-2xl shadow-teal-500/10">
+          <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-teal-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Interactive Entertainment Decision Engine</span>
+              </div>
+              <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-white">
+                Can’t decide what to watch, play, read or hear tonight?
+              </h2>
+              <p className="text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed">
+                Spin the <span className="text-teal-300 font-semibold">Omniverse Vibe Mixer</span>. Calibrate your time budget, emotional frequency, and session vibe to synthesize 3 instant high-resonance picks across movies, series, games, books, manga, and music.
+              </p>
+            </div>
+
+            <div className="shrink-0 flex items-center gap-3">
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => {
+                  haptics.playPop()
+                  setVibeMixerOpen(true)
+                }}
+                className="gap-2 px-6 py-3 font-bold bg-gradient-to-r from-teal-400 to-cyan-400 hover:from-teal-300 hover:to-cyan-300 text-black shadow-lg shadow-teal-500/30 cursor-pointer"
+              >
+                <Sliders className="w-4 h-4 fill-current" />
+                <span>Launch Vibe Mixer</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Trending Catalog */}
       <section id="trending" className="mx-auto max-w-7xl px-4 pb-16">

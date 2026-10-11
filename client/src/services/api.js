@@ -55,6 +55,8 @@ export const mediaApi = {
   recommendations: () => api.get('/media/recommendations'),
   library: (filter) => api.get('/media/library', { params: { filter } }),
   interact: (mediaId, data) => api.put(`/media/${mediaId}/interaction`, data),
+  vibeMixer: (params) => api.get('/media/vibe-mixer', { params }),
+  transmedia: (id) => api.get(`/media/${id}/transmedia`),
 }
 
 export const listApi = {

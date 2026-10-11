@@ -10,12 +10,14 @@ router.use((req, res, next) => {
 });
 
 router.get('/', optionalAuth, media.listMedia);
+router.get('/vibe-mixer', optionalAuth, media.getVibeMixerRecommendations);
 router.get('/search', optionalAuth, media.searchMedia);
 router.get('/genres', optionalAuth, media.listGenres);
 router.get('/by-ids', optionalAuth, media.getByIds);
 router.get('/recommendations', optionalAuth, media.getRecommendations);
 router.get('/library', authenticate, media.getUserLibrary);
 router.get('/:id', optionalAuth, media.getMedia);
+router.get('/:id/transmedia', optionalAuth, media.getTransmediaUniverse);
 router.get('/:id/enrichment', optionalAuth, media.getMediaEnrichment);
 router.put('/:mediaId/interaction', authenticate, media.upsertInteraction);
 

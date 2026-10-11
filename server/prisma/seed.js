@@ -144,7 +144,14 @@ async function main() {
     console.warn('Artwork enrichment warning:', err.message);
   }
 
+  try {
+    execSync('node prisma/seedChuckleChieftain.js', { stdio: 'inherit' });
+  } catch (err) {
+    console.warn('Chuckle Chieftain seeding warning:', err.message);
+  }
+
   console.log('Accounts:');
+  console.log('  chuckle@omniverse.app / chuckle123 (Curated Profile)');
   console.log('  admin@omniverse.app / admin123');
   console.log('  support@omniverse.app / support123');
   console.log('  demo@omniverse.app / user123');

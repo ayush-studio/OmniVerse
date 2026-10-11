@@ -343,3 +343,169 @@ export async function getMediaEnrichment(req, res, next) {
     next(err);
   }
 }
+
+export async function getVibeMixerRecommendations(req, res, next) {
+  try {
+    const { timeCommitment = 'ANY', vibe = 'ADRENALINE', context = 'SOLO', limit = 3 } = req.query;
+
+    const VIBE_KEYWORDS = {
+      MELANCHOLY: ['cyberpunk', 'noir', 'sci-fi', 'drama', 'melancholy', 'mystery', 'lo-fi', 'ambient', 'sad', 'dystopian', 'rain'],
+      ADRENALINE: ['action', 'thriller', 'racing', 'combat', 'shonen', 'adventure', 'fps', 'rock', 'metal', 'superhero'],
+      MINDBENDING: ['psychological', 'puzzle', 'time travel', 'mystery', 'twist', 'philosophy', 'cerebral', 'detective', 'sci-fi'],
+      COZY: ['slice of life', 'cozy', 'casual', 'wholesome', 'comedy', 'relaxation', 'acoustic', 'indie', 'romance', 'animation'],
+      COSMIC: ['space', 'sci-fi', 'epic', 'odyssey', 'universe', 'interstellar', 'orchestral', 'fantasy', 'adventure'],
+      DARK: ['horror', 'dark', 'gritty', 'survival', 'crime', 'dystopian', 'thriller', 'gothic', 'psychological'],
+    };
+
+    const keywords = VIBE_KEYWORDS[String(vibe).toUpperCase()] || VIBE_KEYWORDS.ADRENALINE;
+
+    let allowedTypes = [];
+    if (timeCommitment === 'QUICK') {
+      allowedTypes = ['MUSIC_ALBUM', 'MANGA'];
+    } else if (timeCommitment === 'FEATURE') {
+      allowedTypes = ['MOVIE', 'SERIES'];
+    } else if (timeCommitment === 'DEEP') {
+      allowedTypes = ['GAME', 'BOOK', 'SERIES'];
+    }
+
+    const where = {};
+    if (allowedTypes.length > 0) {
+      where.type = { in: allowedTypes };
+    }
+
+    if (req.user?.childLockEnabled) {
+      const max = req.user.maxMaturityRating || 'PG13';
+      const allowed = ['G', 'PG13', 'R', 'ADULT_18'].filter((r) => canViewMaturity(max, r));
+      where.maturityRating = { in: allowed };
+    }
+
+    const candidates = await prisma.mediaItem.findMany({
+      where,
+      orderBy: { averageRating: 'desc' },
+      take: 60,
+    });
+
+    const scored = candidates.map((item) => {
+      const tags = parseJson(item.genreTags, []).map((t) => t.toLowerCase());
+      const summary = (item.summary || '').toLowerCase();
+      const title = item.title.toLowerCase();
+
+      let matchCount = 0;
+      for (const kw of keywords) {
+        if (tags.some((t) => t.includes(kw))) matchCount += 3;
+        else if (summary.includes(kw)) matchCount += 1.5;
+        else if (title.includes(kw)) matchCount += 1;
+      }
+
+      if (context === 'DATE_NIGHT' && (tags.includes('romance') || tags.includes('comedy') || tags.includes('drama'))) matchCount += 2;
+      if (context === 'PARTY' && (tags.includes('music') || tags.includes('comedy') || tags.includes('action'))) matchCount += 2;
+      if (context === 'SOLO' && (tags.includes('sci-fi') || tags.includes('rpg') || tags.includes('mystery'))) matchCount += 2;
+
+      const baseConfidence = Math.min(99, Math.max(78, Math.round(74 + matchCount * 3.5 + (item.averageRating / 10) * 12)));
+
+      const reasons = {
+        MELANCHOLY: 'Atmospheric, reflective, and sonically deep — ideal for late night introspective focus.',
+        ADRENALINE: 'Relentless pacing, razor-sharp tension, and dynamic energy from start to finish.',
+        MINDBENDING: 'Uncompromising cerebral mystery that challenges perceptions and keeps you guessing.',
+        COZY: 'Effortlessly charming and low-stress — warm emotional comfort without heavy friction.',
+        COSMIC: 'Vast, awe-inspiring scope that evokes existential wonder and interstellar grandeur.',
+        DARK: 'Unflinching, visceral, and gritty storytelling designed for maximum psychological tension.',
+      };
+
+      return {
+        item: serializeMedia(item),
+        score: matchCount * 10 + item.averageRating,
+        matchConfidence: baseConfidence,
+        vibeReason: reasons[String(vibe).toUpperCase()] || 'Selected based on your customized mood profile.',
+      };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+
+    const takeCount = Math.min(12, Math.max(1, Number(limit) || 3));
+    const selected = scored.slice(0, takeCount);
+
+    res.json({
+      picks: selected,
+      vibe: String(vibe).toUpperCase(),
+      timeCommitment,
+      context,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getTransmediaUniverse(req, res, next) {
+  try {
+    const item = await prisma.mediaItem.findUnique({ where: { id: req.params.id } });
+    if (!item) return res.status(404).json({ error: 'Media not found' });
+
+    const source = serializeMedia(item);
+    const sourceTags = (source.genreTags || []).map((t) => t.toLowerCase());
+    const sourceSummary = (source.summary || '').toLowerCase();
+
+    const otherItems = await prisma.mediaItem.findMany({
+      where: {
+        id: { not: source.id },
+        type: { not: source.type },
+        ...(req.user?.childLockEnabled
+          ? {
+              maturityRating: {
+                in: ['G', 'PG13', 'R', 'ADULT_18'].filter((r) =>
+                  canViewMaturity(req.user.maxMaturityRating || 'PG13', r)
+                ),
+              },
+            }
+          : {}),
+      },
+      orderBy: { averageRating: 'desc' },
+      take: 120,
+    });
+
+    const scored = otherItems.map((candidate) => {
+      const candidateTags = parseJson(candidate.genreTags, []).map((t) => t.toLowerCase());
+      const candidateSummary = (candidate.summary || '').toLowerCase();
+
+      let affinity = 0;
+      for (const st of sourceTags) {
+        if (candidateTags.some((ct) => ct.includes(st) || st.includes(ct))) {
+          affinity += 4;
+        }
+      }
+      const words = sourceSummary.split(/\s+/).filter((w) => w.length > 5);
+      for (const w of words.slice(0, 15)) {
+        if (candidateSummary.includes(w)) affinity += 1.2;
+      }
+
+      affinity += candidate.averageRating * 0.4;
+
+      return {
+        item: serializeMedia(candidate),
+        affinityScore: Math.min(99, Math.max(75, Math.round(72 + affinity * 2.5))),
+        sharedTags: candidateTags.filter((ct) => sourceTags.some((st) => ct.includes(st) || st.includes(ct))),
+      };
+    });
+
+    const mediaTypes = ['MOVIE', 'SERIES', 'GAME', 'BOOK', 'MANGA', 'MUSIC_ALBUM'].filter((t) => t !== source.type);
+    const universePicks = [];
+
+    for (const type of mediaTypes) {
+      const forType = scored
+        .filter((s) => s.item.type === type)
+        .sort((a, b) => b.affinityScore - a.affinityScore);
+      if (forType[0]) {
+        universePicks.push(forType[0]);
+      }
+    }
+
+    res.json({
+      source,
+      universe: universePicks,
+      thematicBridge: `Traverse beyond ${source.title} (${source.type}) into connected worlds echoing its ${sourceTags.slice(0, 3).join(', ')} frequency.`,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+

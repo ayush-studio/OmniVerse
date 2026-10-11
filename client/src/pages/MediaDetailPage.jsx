@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { Star, Heart, BookmarkPlus, ListPlus, Play, Film, Sparkles } from 'lucide-react'
+import { Star, Heart, BookmarkPlus, ListPlus, Play, Film, Sparkles, Compass, Zap, Check } from 'lucide-react'
 import { mediaApi, forumApi, listApi } from '@/services/api'
 import { useAuthStore, useRecentStore } from '@/store'
 import { usePlayerStore } from '@/store/playerStore'
@@ -10,6 +10,7 @@ import TrailerModal from '@/components/media/TrailerModal'
 import StreamingProvidersCard from '@/components/media/StreamingProvidersCard'
 import AudioPreviewPlayer from '@/components/media/AudioPreviewPlayer'
 import AmbientBackdrop from '@/components/media/AmbientBackdrop'
+import TransmediaGalaxy from '@/components/media/TransmediaGalaxy'
 import { typeLabel, WISHLIST_OPTIONS, cn } from '@/utils/cn'
 import { haptics } from '@/utils/audioHaptics'
 
@@ -196,21 +197,34 @@ export default function MediaDetailPage() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-8">
-        <div className="flex gap-2 mb-6 border-b border-[var(--border)]">
-          {['overview', 'discussion'].map((t) => (
+        <div className="flex gap-2 mb-6 border-b border-[var(--border)] overflow-x-auto pb-1 scrollbar-thin">
+          {[
+            { id: 'overview', label: 'Overview' },
+            { id: 'galaxy', label: 'Transmedia Galaxy', badge: '6 Mediums' },
+            { id: 'discussion', label: 'Discussion' },
+          ].map((t) => (
             <button
-              key={t}
+              key={t.id}
               onClick={() => {
-                setTab(t)
-                setSearchParams({ tab: t })
+                haptics.playClick()
+                setTab(t.id)
+                setSearchParams({ tab: t.id })
               }}
               className={cn(
-                'px-4 py-2 text-sm capitalize border-b-2 -mb-px transition flex items-center gap-1.5',
-                tab === t ? 'border-teal-400 text-teal-300' : 'border-transparent text-[var(--text-muted)]'
+                'px-4 py-2 text-sm capitalize border-b-2 -mb-px transition flex items-center gap-1.5 shrink-0',
+                tab === t.id
+                  ? 'border-teal-400 text-teal-300 font-bold'
+                  : 'border-transparent text-[var(--text-muted)] hover:text-white'
               )}
             >
-              <span>{t}</span>
-              {t === 'discussion' && item.discussionCount > 0 && (
+              {t.id === 'galaxy' && <Compass className="w-3.5 h-3.5 text-teal-400" />}
+              <span>{t.label}</span>
+              {t.badge && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                  {t.badge}
+                </span>
+              )}
+              {t.id === 'discussion' && item.discussionCount > 0 && (
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
                   {item.discussionCount}
                 </span>
@@ -220,7 +234,8 @@ export default function MediaDetailPage() {
         </div>
 
         {tab === 'overview' && (
-          <div className="grid lg:grid-cols-[1fr_300px] gap-8">
+          <>
+            <div className="grid lg:grid-cols-[1fr_300px] gap-8">
             <div className="space-y-6">
               <div className="glass rounded-3xl p-6 border border-white/10">
                 <h2 className="font-display text-xl font-bold mb-2">Synopsis</h2>
@@ -394,7 +409,17 @@ export default function MediaDetailPage() {
               )}
             </aside>
           </div>
-        )}
+
+          {/* Embedded Transmedia Galaxy in Overview */}
+          <TransmediaGalaxy mediaId={item.id} sourceItem={item} />
+        </>
+      )}
+
+      {tab === 'galaxy' && (
+        <div className="space-y-6">
+          <TransmediaGalaxy mediaId={item.id} sourceItem={item} />
+        </div>
+      )}
 
         {tab === 'discussion' && (
           <div className="space-y-6">
